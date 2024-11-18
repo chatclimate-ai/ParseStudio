@@ -55,6 +55,26 @@ class DoclingPDFParser:
     ) -> Generator[ConversionResult, None, None]:
         """
         Parse the given document and return the parsed result.
+
+        :param paths: List[str]
+            The list of paths to the documents to parse
+        :param raises_on_error: bool
+            Whether to raise an error if the document fails to parse
+        :param max_num_pages: int
+            The maximum number of pages to parse
+        :param max_file_size: int
+            The maximum file size to parse
+        :return: Generator[ConversionResult, None, None]
+            A generator that yields the parsed result for each document
+
+        :raises ValueError: If the Docling Parser has not been initialized
+        :raises ValueError: If the document fails to parse
+        
+        :example:
+        >>> parser = DoclingPDFParser()
+        >>> for result in parser.load_documents(["path/to/file.pdf"]):
+        >>>     if result.status == ConversionStatus.SUCCESS:
+        >>>         print(result.document)
         """
         if not self.initialized:
             raise ValueError("The Docling Parser has not been initialized.")
@@ -76,6 +96,49 @@ class DoclingPDFParser:
         modalities: List[str] = ["text", "tables", "images"],
         **kwargs,
     ) -> List[ParserOutput]:
+        """
+        Parse the given document and export the parsed results.
+        
+        :param paths: Union[str, List[str]]
+            The path to the document or a list of paths to the documents to parse
+        :param modalities: List[str]
+            The modalities to export the parsed results in (text, tables, images)
+        :param do_ocr: bool
+            Whether to perform OCR on the document
+        :param ocr_options: str
+            The OCR options to use (easyocr, tesseract)
+        :param do_table_structure: bool
+            Whether to extract table structure from the document
+        :param do_cell_matching: bool
+            Whether to perform cell matching on the extracted tables
+        :param tableformer_mode: str
+            The mode to use for table extraction (ACCURATE, FAST)
+        :param images_scale: float
+            The scale factor to resize the images by
+        :param generate_page_images: bool
+            Whether to generate images for each page of the document
+        :param generate_picture_images: bool
+            Whether to generate images for each picture in the document
+        :param generate_table_images: bool
+            Whether to generate images for each table in the document
+        :param backend: str
+            The backend to use for parsing the document (docling, pypdfium)
+        :param embed_images: bool
+            Whether to embed images in the exported markdown text
+        
+        :return: List[ParserOutput]
+            A list of parsed results for each document
+        
+        :raises ValueError: If the Docling Parser has not been initialized
+        
+        :example:
+        >>> parser = DoclingPDFParser()
+        >>> data = parser.parse_and_export("path/to/file.pdf", modalities=["text", "tables", "images"])
+
+        :example:
+        >>> parser = DoclingPDFParser()
+        >>> data = parser.parse_and_export(["path/to/file1.pdf", "path/to/file2.pdf"], modalities=["text", "tables", "images"])
+        """
         if isinstance(paths, str):
             paths = [paths]
 
@@ -155,6 +218,14 @@ class DoclingPDFParser:
     ) -> ParserOutput:
         """
         Export the parsed results to the output directory.
+
+        :param document: DoclingDocument
+            The parsed document to export
+        :param modalities: List[str]
+            The modalities to export the parsed results in (text, tables, images)
+
+        :return: ParserOutput
+            The parsed results for the document
         """
         text = ""
         tables: List[Dict] = []
@@ -177,6 +248,12 @@ class DoclingPDFParser:
     def _extract_tables(item: TableItem) -> List[Dict]:
         """
         Extract tables from the document and return as a list of dictionaries with table markdown, dataframe, and caption data.
+
+        :param item: TableItem
+            The table item to extract
+        
+        :return: List[Dict]
+            A list of dictionaries with table markdown and dataframe
         """
         table_md: str = item.export_to_markdown()
         table_df: pd.DataFrame = item.export_to_dataframe()
@@ -187,6 +264,12 @@ class DoclingPDFParser:
     def _extract_images(item: PictureItem) -> List[Dict]:
         """
         Extract images from the document and return as a list of dictionaries with image and caption data.
+
+        :param item: PictureItem
+            The picture item to extract
+        
+        :return: List[Dict]
+            A list of dictionaries with image data
         """
         image: Image.Image = item.image.pil_image
         return [{"image": image}]
@@ -194,6 +277,12 @@ class DoclingPDFParser:
     def _extract_text(self, item: DoclingDocument) -> str:
         """
         Extract text from the document.
+
+        :param item: DoclingDocument
+            The document to extract text from
+        
+        :return: str
+            The extracted text
         """
         if self.embed_images:
             return item.export_to_markdown(
