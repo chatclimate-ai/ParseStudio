@@ -1,4 +1,4 @@
-name: CI-parseval
+name: CI-parstudio
 
 on:
   push:
@@ -31,14 +31,23 @@ jobs:
         virtualenvs-create: true
         virtualenvs-in-project: true
 
+    - name: Add Poetry to PATH
+      if: runner.os == 'Windows'
+      run: |
+        echo "::add-path::$env:USERPROFILE\\.poetry\\bin"
+      shell: pwsh
+
     - name: Set Python version for Poetry
       run: poetry env use python
+      shell: bash
 
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v3
       with:
-        path: .venv
+        path: |
+          .venv
+          ${{ runner.os == 'Windows' && '.venv\\Scripts\\*' || '.venv/bin/*' }}
         key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: Install dependencies
