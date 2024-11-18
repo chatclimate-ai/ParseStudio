@@ -35,7 +35,7 @@ jobs:
       if: runner.os == 'windows-latest'
       run: |
         echo "Adding Poetry path to PATH"
-        echo "C:\Users\runneradmin\AppData\Roaming\Python\Scripts" >> $env:GITHUB_PATH
+        echo "C:\Users\runneradmin\.local\bin\poetry" >> $env:GITHUB_PATH
       shell: pwsh
 
     - name: Set Python version for Poetry
