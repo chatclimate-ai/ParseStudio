@@ -27,17 +27,12 @@ jobs:
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
-        version: 1.5.1
+        version: 1.8.4
         virtualenvs-create: true
         virtualenvs-in-project: true
 
-    - name: Add Poetry to PATH
-      shell: bash
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
     - name: Set Python version for Poetry
-      shell: bash
-      run: poetry env use python${{ matrix.python-version }}
+      run: poetry env use python
 
     - name: Load cached venv
       id: cached-poetry-dependencies
@@ -48,13 +43,12 @@ jobs:
 
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      shell: bash
       run: poetry install --no-interaction --no-root
 
     - name: Install project
-      shell: bash
       run: poetry install --no-interaction
 
     - name: Run tests
+      run: |
+        poetry run pytest tests/
       shell: bash
-      run: poetry run pytest tests/
