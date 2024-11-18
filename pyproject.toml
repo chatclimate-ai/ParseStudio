@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "parseval"
+version = "0.1.0"
+description = ""
+authors = ["Imene KOLLI <53266529+imene-swaan@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11.10"
+pymupdf = "^1.24.12"
+pdfplumber = "^0.11.4"
+docling = "^2.2.0"
+html2markdown = "^0.1.7"
+markdownify = "^0.13.1"
+html2text = "^2024.2.26"
+llama-parse = "^0.5.13"
+pymupdf4llm = "^0.0.17"
+pytest = "^8.3.3"
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
