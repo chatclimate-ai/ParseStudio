@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from PIL import Image
 from io import StringIO
-from parseval.parsers.llama_parser import LlamaPDFParser, ParserOutput
+from parstudio.parsers.llama_parser import LlamaPDFParser, ParserOutput
 
 
 class TestLlamaPDFParser:
@@ -127,7 +127,7 @@ class TestLlamaPDFParser:
         assert result[0]["table_md"] == "| Header |\n|--------|"
         assert isinstance(result[0]["table_df"], pd.DataFrame)
 
-    @patch("parseval.parsers.llama_parser.Image.open")
+    @patch("parstudio.parsers.llama_parser.Image.open")
     @patch("os.remove")
     def test_extract_images(self, mock_remove, mock_image_open, parser):
         """
