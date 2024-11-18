@@ -27,17 +27,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
+        shell: bash
         run: |
-          if [[ $RUNNER_OS == "Windows" ]]; then
-            # Install Poetry for Windows
-            (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+          if [ $RUNNER_OS == "Windows" ]; then
+            pwsh -Command "(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -"
             echo "$env:USERPROFILE\\.poetry\\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
           else
-            # Install Poetry for MacOS
             curl -sSL https://install.python-poetry.org | python3 -
             echo "$HOME/.local/bin" >> $GITHUB_PATH
           fi
-        shell: bash
 
       - name: Install System Dependencies (MacOS Only)
         if: runner.os == 'macOS'
