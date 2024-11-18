@@ -4,7 +4,7 @@ import fitz
 from PIL import Image
 import pandas as pd
 from io import BytesIO
-from parseval.parsers.pymupdf_parser import PyMuPDFParser, ParserOutput
+from parstudio.parsers.pymupdf_parser import PyMuPDFParser, ParserOutput
 
 
 @pytest.fixture
