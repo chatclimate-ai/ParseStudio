@@ -26,28 +26,32 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
+      - name: Install Poetry (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+          [System.Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Users\runneradmin\AppData\Roaming\Python\Scripts", [System.EnvironmentVariableTarget]::Process)
+
+      - name: Install Poetry (MacOS)
+        if: runner.os == 'macOS'
         shell: bash
         run: |
-          if [ $RUNNER_OS == "Windows" ]; then
-            pwsh -Command "(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -"
-            echo "$env:USERPROFILE\\.poetry\\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
-          else
-            curl -sSL https://install.python-poetry.org | python3 -
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
-          fi
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install System Dependencies (MacOS Only)
         if: runner.os == 'macOS'
         run: |
           brew update
-          brew install libffi openssl
+          brew install zlib mupdf openssl libffi libjpeg libpng geos
         shell: bash
 
       - name: Add PKG_CONFIG_PATH (MacOS Only)
         if: runner.os == 'macOS'
-        run: echo "PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig" >> $GITHUB_ENV
+        run: echo "PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:/usr/local/lib/pkgconfig" >> $GITHUB_ENV
         shell: bash
+
 
       - name: Verify Poetry Installation
         run: poetry --version
