@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from parseval.parsers.docling_parser import DoclingPDFParser, ParserOutput
+from parstudio.parsers.docling_parser import DoclingPDFParser, ParserOutput
 from docling.datamodel.document import ConversionResult, DoclingDocument
 from docling.datamodel.base_models import ConversionStatus
 from PIL import Image
@@ -29,9 +29,9 @@ class TestDoclingPDFParser:
             assert isinstance(result, ConversionResult)
 
     @patch(
-        "parseval.parsers.docling_parser.DoclingPDFParser._DoclingPDFParser__initialize_docling"
+        "parstudio.parsers.docling_parser.DoclingPDFParser._DoclingPDFParser__initialize_docling"
     )
-    @patch("parseval.parsers.docling_parser.DoclingPDFParser.load_documents")
+    @patch("parstudio.parsers.docling_parser.DoclingPDFParser.load_documents")
     def test_parse_and_export(self, mock_load_documents, mock_initialize, parser):
         # Create a mock ConversionResult
         mock_document = Mock(spec=DoclingDocument)
