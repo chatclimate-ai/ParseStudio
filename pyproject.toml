@@ -6,7 +6,7 @@ authors = ["Imene KOLLI <53266529+imene-swaan@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.12.7"
+python = ">=3.12,<3.13"
 docling = "^2.5.2"
 pymupdf = "^1.24.13"
 llama-parse = "^0.5.14"
