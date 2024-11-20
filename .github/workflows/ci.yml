@@ -1,4 +1,4 @@
-name: CI-parseval
+name: CI-parstudio
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.12.7']
+        python-version: ['>=3.12,<3.13']
         os: [ubuntu-latest, windows-latest, macos-13]
 
     runs-on: ${{ matrix.os }}
@@ -33,23 +33,20 @@ jobs:
     
     - name: Add Poetry to PATH (Windows Only)
       if: runner.os == 'windows-latest'
-      run: |
-        echo "Adding Poetry path to PATH"
-        echo "C:\Users\runneradmin\.local\bin\poetry" >> $env:GITHUB_PATH
-      shell: pwsh
+      run: echo "C:\Users\runneradmin\.local\bin" >> $GITHUB_PATH
 
     - name: Set Python version for Poetry
       run: poetry env use python
 
-    - name: Load cached venv
-      id: cached-poetry-dependencies
+    - name: Cache Poetry dependencies
+      id: poetry-cache
       uses: actions/cache@v3
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      if: steps.poetry-cache.outputs.cache-hit != 'true'
       run: | 
         poetry install --no-interaction --no-root --verbose || true
         poetry debug resolve
