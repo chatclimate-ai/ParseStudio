@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="parsestudio",
+    name="parstudio",
     version="0.1.0",
     author="Imene KOLLI",
     author_email="53266529+imene-swaan@users.noreply.github.com",
