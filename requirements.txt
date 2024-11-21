@@ -1,0 +1,5 @@
+docling==2.5.2
+pymupdf==1.24.13
+llama-parse==0.5.14
+pytest==8.3.3
+python-dotenv==1.0.1
