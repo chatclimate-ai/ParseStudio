@@ -1,0 +1,62 @@
+site_name: Parse Eval Package Documentation
+
+theme:
+  name: material
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    logo: material/tree
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.prune
+    - navigation.path
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.prettify
+
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+      primary: teal
+      accent: purple
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+      primary: teal
+      accent: lime
+
+plugins:
+  - search
+  - mkdocstrings
+
+
+nav:
+  - Home: index.md
+  - Docling Parser:
+      - Docling: parsers/docling_parser.md
+  - Llama Parser:
+      - Llama: parsers/llama_parser.md
+  - PmuPDF Parser:
+      - PmuPDF: parsers/pymupdf_parser.md
+
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
