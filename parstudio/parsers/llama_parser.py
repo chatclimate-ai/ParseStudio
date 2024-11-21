@@ -101,11 +101,11 @@ class LlamaPDFParser:
             data (List[ParserOutput]): A list of ParserOutput objects containing the parsed results.
         
         
-        Example:
+        Examples:
             >>> parser = LlamaPDFParser()
             >>> data = parser.parse_and_export("path/to/pdf/file.pdf", modalities=["text", "tables", "images"])
             >>> print(data)
-            ... [ParserOutput(text="...", tables=[...], images=[...])]
+            [ParserOutput(text="...", tables=[...], images=[...])]
 
         """
         if isinstance(paths, str):

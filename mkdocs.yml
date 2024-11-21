@@ -2,47 +2,50 @@ site_name: Parse Studio
 
 theme:
   name: material
-  font:
-    text: Roboto
-    code: Roboto Mono
-  icon:
-    logo: material/tree
   features:
     - navigation.tabs
-    - navigation.tabs.sticky
     - navigation.sections
-    - navigation.expand
-    - navigation.prune
-    - navigation.path
+    - toc.integrate
     - navigation.top
-    - navigation.tracking
     - search.suggest
     - search.highlight
+    - search
+    - content.tabs.link
+    - content.code.annotation
     - content.code.copy
-    - content.code.prettify
-
+    - content.code.tabbed
+    - content.image.figure
+    - content.image.lightbox
+    - content.image.zoom
+    - content.video
+    - content.iframe
+    - content.math
   language: en
   palette:
     - scheme: default
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/toggle-switch-off-outline 
         name: Switch to dark mode
-      primary: teal
-      accent: purple
-    - scheme: slate
+      primary: lime
+      accent: purple 
+    - scheme: slate 
       toggle:
         icon: material/toggle-switch
-        name: Switch to light mode
-      primary: teal
+        name: Switch to light mode    
+      primary: purple-grey
       accent: lime
 
 plugins:
-  - search
-  - mkdocstrings
+  - search:
+      lang: en
+  - mkdocstrings:
+      default_handler: python
+  - autorefs
 
 
 nav:
-  - Home: index.md
+  - Home:
+    - Welcome to Parse Studio: index.md
   - Docling Parser:
       - Overview: parsers/docling_parser.md
   - Llama Parser:

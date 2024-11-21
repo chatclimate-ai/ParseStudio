@@ -70,15 +70,14 @@ class DoclingPDFParser:
         Raises:
             ValueError: If the Docling Parser has not been initialized
         
-        Example:
+        Examples:
             >>> parser = DoclingPDFParser()
             >>> for result in parser.load_documents(["path/to/file1.pdf", "path/to/file2.pdf"]):
             ...     if result.status == ConversionStatus.SUCCESS:
             ...         print(result.document)
             ...     else:
             ...         print(result.errors)
-
-            ... ConversionResult(status=<ConversionStatus.SUCCESS: 'SUCCESS'>, document=<DoclingDocument>, errors=None)
+            ConversionResult(status=<ConversionStatus.SUCCESS: 'SUCCESS'>, document=<DoclingDocument>, errors=None)
         """
         if not self.initialized:
             raise ValueError("The Docling Parser has not been initialized.")
@@ -126,11 +125,11 @@ class DoclingPDFParser:
             ValueError: If the mode specified for the tableformer is invalid
             ValueError: If the backend specified is invalid
         
-        Example:
+        Examples:
             >>> parser = DoclingPDFParser()
             >>> data = parser.parse_and_export("path/to/file.pdf", modalities=["text", "tables", "images"])
             >>> print(data)
-            ... [ParserOutput(text="...", tables=[{"table_md": "...", "table_df": pd.DataFrame}], images=[{"image": Image.Image}])]
+            [ParserOutput(text="...", tables=[{"table_md": "...", "table_df": pd.DataFrame}], images=[{"image": Image.Image}])]
         """
         if isinstance(paths, str):
             paths = [paths]
@@ -247,10 +246,10 @@ class DoclingPDFParser:
         Returns:
             tables (List[Dict]): A list of dictionaries with table data. Each dictionary contains a markdown table (table_md) and a pandas dataframe (table_df).
 
-        Example:
+        Examples:
             >>> tables = self._extract_tables(item)
             >>> print(tables)
-            ... [{"table_md": "...", "table_df": pd.DataFrame}]
+            [{"table_md": "...", "table_df": pd.DataFrame}]
         """
         table_md: str = item.export_to_markdown()
         table_df: pd.DataFrame = item.export_to_dataframe()
