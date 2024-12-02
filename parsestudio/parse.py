@@ -7,7 +7,7 @@ from .parsers.schemas import ParserOutput
 
 class PDFParser:
     """
-    A class to parse PDF files using different parsers.
+    Parse PDF files using different parsers.
     """
     def __init__(self, parser: Literal["docling", "llama", "pymupdf"] = "docling", **parser_kwargs):
         """
