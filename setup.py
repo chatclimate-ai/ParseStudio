@@ -4,11 +4,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="parstudio",
+    name="parsestudio",
     version="0.1.0",
     author="Imene KOLLI",
-    author_email="53266529+imene-swaan@users.noreply.github.com",
-    description="",
+    author_email="imene.kolli@df.uzh.ch",
+    description="Parse PDF files using different parsers.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests"]),
