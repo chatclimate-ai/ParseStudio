@@ -1,4 +1,4 @@
-from parstudio.parse import PDFParser
+from parsestudio.parse import PDFParser
 
 if __name__ == "__main__":
     parser = PDFParser(parser="pymupdf")
