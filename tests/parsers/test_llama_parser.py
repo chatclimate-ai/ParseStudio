@@ -1,16 +1,18 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import os
 import pandas as pd
 from PIL import Image
-from io import StringIO
 from parsestudio.parsers.llama_parser import LlamaPDFParser, ParserOutput, TableElement, ImageElement, Metadata, TextElement
 
 
 class TestLlamaPDFParser:
     @pytest.fixture
     def parser(self):
-        return LlamaPDFParser()
+        with patch.dict("os.environ", {"LLAMA_PARSE_KEY": "mock_api_key"}):
+            return LlamaPDFParser()
+        
+        assert parser.converter.api_key == "mock_api_key"
 
     @patch.dict(os.environ, {"LLAMA_PARSE_KEY": "mock_api_key"})
     def test_init(self, parser):
