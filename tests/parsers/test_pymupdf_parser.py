@@ -4,13 +4,14 @@ import fitz
 from PIL import Image
 import pandas as pd
 from io import BytesIO
-from parstudio.parsers.pymupdf_parser import PyMuPDFParser, ParserOutput
+from parsestudio.parsers.pymupdf_parser import PyMuPDFParser, ParserOutput, TableElement, TextElement, ImageElement, Metadata
 
 
 @pytest.fixture
 def mock_page():
     mock = MagicMock(spec=fitz.Page)
     type(mock).parent = PropertyMock(return_value=MagicMock())
+    mock.number = 1
     mock.get_text.return_value = "Sample text"
     mock.get_images.return_value = [
         (1, 0, 0, 0, 0, 0, 0, "image/jpeg", b"", "image1", 0)
@@ -57,9 +58,9 @@ class TestPyMuPDFParser:
                 PyMuPDFParser, "_PyMuPDFParser__export_result"
             ) as mock_export:
                 mock_export.return_value = ParserOutput(
-                    text="test", tables=[], images=[]
+                    text= TextElement(text="test")  
                 )
-                result = parser.parse_and_export("test.pdf")
+                result = parser.parse("test.pdf")
                 assert isinstance(result, list)
                 assert len(result) == 1
                 assert isinstance(result[0], ParserOutput)
@@ -74,12 +75,14 @@ class TestPyMuPDFParser:
                 PyMuPDFParser, "_PyMuPDFParser__export_result"
             ) as mock_export:
                 mock_export.return_value = ParserOutput(
-                    text="test", tables=[], images=[]
+                    text= TextElement(text="test") 
                 )
-                result = parser.parse_and_export(["test1.pdf", "test2.pdf"])
+                result = parser.parse(["test1.pdf", "test2.pdf"])
                 assert isinstance(result, list)
                 assert len(result) == 2
                 assert all(isinstance(r, ParserOutput) for r in result)
+
+
 
     def test_export_result(self, parser, mock_page):
         """
@@ -88,21 +91,24 @@ class TestPyMuPDFParser:
         with patch.object(PyMuPDFParser, "_extract_text") as mock_text:
             with patch.object(PyMuPDFParser, "_extract_tables") as mock_tables:
                 with patch.object(PyMuPDFParser, "_extract_images") as mock_images:
-                    mock_text.return_value = "Sample text"
-                    mock_tables.return_value = [
-                        {
-                            "table_md": "| Header |\n|--------|",
-                            "table_df": pd.DataFrame(),
-                        }
-                    ]
-                    mock_images.return_value = [{"image": Image.new("RGB", (60, 30))}]
+                    mock_text.return_value = TextElement(text="Sample text")
+                    mock_tables.return_value = [TableElement(
+                        markdown="| Header |\n|--------|", 
+                        dataframe=pd.DataFrame(), 
+                        metadata=Metadata()
+                        )]
+                    
+                    mock_images.return_value = [ImageElement(
+                        image=Image.new("RGB", (60, 30)), 
+                        metadata=Metadata()
+                        )]
 
                     result = parser._PyMuPDFParser__export_result(
                         [mock_page], ["text", "tables", "images"]
-                    )
+                        )
 
                     assert isinstance(result, ParserOutput)
-                    assert result.text == "Sample text\n"
+                    assert result.text.text == "Sample text\n"
                     assert len(result.tables) == 1
                     assert len(result.images) == 1
 
@@ -111,7 +117,7 @@ class TestPyMuPDFParser:
         Test that the parser extracts text correctly.
         """
         result = PyMuPDFParser._extract_text(mock_page)
-        assert result == "Sample text"
+        assert result.text == "Sample text"
         mock_page.get_text.assert_called_once_with("text")
 
     @patch("PIL.Image.open")
@@ -122,7 +128,7 @@ class TestPyMuPDFParser:
         mock_image_open.return_value.convert.return_value = Image.new("RGB", (60, 30))
         result = PyMuPDFParser._extract_images(mock_page)
         assert len(result) == 1
-        assert isinstance(result[0]["image"], Image.Image)
+        assert isinstance(result[0].image, Image.Image)
 
     def test_extract_tables(self, mock_page):
         """
@@ -130,6 +136,4 @@ class TestPyMuPDFParser:
         """
         result = PyMuPDFParser._extract_tables(mock_page)
         assert len(result) == 1
-        assert "table_md" in result[0]
-        assert "table_df" in result[0]
-        assert isinstance(result[0]["table_df"], pd.DataFrame)
+        assert isinstance(result[0].dataframe, pd.DataFrame)
