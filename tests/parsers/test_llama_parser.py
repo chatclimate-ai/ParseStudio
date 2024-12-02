@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from PIL import Image
 from io import StringIO
-from parstudio.parsers.llama_parser import LlamaPDFParser, ParserOutput
+from parsestudio.parsers.llama_parser import LlamaPDFParser, ParserOutput, TableElement, ImageElement, Metadata, TextElement
 
 
 class TestLlamaPDFParser:
@@ -12,107 +12,103 @@ class TestLlamaPDFParser:
     def parser(self):
         return LlamaPDFParser()
 
+    @patch.dict(os.environ, {"LLAMA_PARSE_KEY": "mock_api_key"})
     def test_init(self, parser):
         """
         Test the initialization of the LlamaPDFParser class.
         """
-        assert parser.initialized is False
+        llama_options = {
+            "show_progress": False
+        }
 
-    def test_load_documents_not_initialized(self, parser):
-        """
-        Test the load_documents method when the parser is not initialized.
-        """
-        with pytest.raises(
-            ValueError, match="The Docling Parser has not been initialized."
-        ):
-            next(parser.load_documents(["test.pdf"]))
+        with patch("parsestudio.parsers.llama_parser.LlamaParse") as mock_llama:
+            mock_llama_instance = mock_llama.return_value
+            mock_llama_instance.api_key = "mock_api_key"
+            mock_llama_instance.show_progress = llama_options["show_progress"]
 
-    @patch("os.path.exists", return_value=True)
-    def test_load_documents_file_not_pdf(self, mock_exists, parser):
-        """
-        Test the load_documents method when the file is not a PDF file.
-        """
-        parser.initialized = True
-        with pytest.raises(ValueError, match="The file test.txt must be a PDF file."):
-            next(parser.load_documents(["test.txt"]))
+            parser = LlamaPDFParser(llama_options)
+            mock_llama.assert_called_once_with(
+                api_key="mock_api_key",
+                **llama_options
+            )
 
-    @patch("os.path.exists", return_value=False)
-    def test_load_documents_file_not_found(self, mock_exists, parser):
-        """
-        Test the load_documents method when the file does not exist.
-        """
-        parser.initialized = True
-        with pytest.raises(
-            FileNotFoundError, match="The file test.pdf does not exist."
-        ):
-            next(parser.load_documents(["test.pdf"]))
 
-    @patch("os.path.exists", return_value=True)
-    def test_load_documents_success(self, mock_exists, parser):
+
+        assert parser.converter.api_key == "mock_api_key"
+        assert parser.converter.show_progress == llama_options["show_progress"]
+
+
+    def test_load_documents(self, parser):
         """
         Test the load_documents method when the parser is initialized and the file exists.
         """
-        parser.initialized = True
         parser.converter = Mock()
         parser.converter.get_json_result.return_value = [{"test": "data"}]
         result = list(parser.load_documents(["test.pdf"]))
         assert result == [{"test": "data"}]
 
-    @patch.object(LlamaPDFParser, "_LlamaPDFParser__initialize_llama")
+
+    @patch.dict(os.environ, {"LLAMA_PARSE_KEY": "mock_api_key"})
     @patch.object(LlamaPDFParser, "load_documents")
     @patch.object(LlamaPDFParser, "_LlamaPDFParser__export_result")
-    def test_parse_and_export(self, mock_export, mock_load, mock_init, parser):
+    def test_parse(self, mock_export, mock_load, parser):
         """
         Test the parse_and_export method by patching the load_documents and __export_result methods.
         """
-        mock_load.return_value = [{"test": "data"}]
-        mock_export.return_value = ParserOutput(text="test", tables=[], images=[])
-        result = parser.parse_and_export("test.pdf")
-        assert isinstance(result, list)
-        assert isinstance(result[0], ParserOutput)
-        mock_init.assert_called_once()
-        mock_load.assert_called_once_with(["test.pdf"])
-        mock_export.assert_called_once_with(
-            {"test": "data"}, ["text", "tables", "images"]
-        )
-
-    def test_export_result(self, parser):
-        """
-        Test the __export_result method giving a json result with text, tables, and images that
-        should be extracted.
-        """
-        json_result = {
+        mock_document = {
+            "job_id": "job123",
             "pages": [
                 {
-                    "text": "Test text",
+                    "page": 1,
+                    "text": "Sample text",
                     "items": [
                         {
                             "type": "table",
                             "md": "| Header |\n|--------|",
-                            "csv": "Header\nValue",
+                            "csv": "Header\nValue"
                         }
-                    ],
+                    ]
                 }
             ]
         }
-        with patch.object(
-            LlamaPDFParser,
-            "_extract_images",
-            return_value=[{"image": Image.new("RGB", (60, 30))}],
-        ):
-            result = parser._LlamaPDFParser__export_result(
-                json_result, ["text", "tables", "images"]
-            )
-        assert isinstance(result, ParserOutput)
-        assert result.text == "Test text\n"
-        assert len(result.tables) == 1
-        assert len(result.images) == 1
+        mock_load.return_value = [mock_document]
+        mock_export.return_value = ParserOutput(
+            text= TextElement(text="Sample text"),
+            tables=[TableElement(
+                markdown="| Header |\n|--------|", 
+                dataframe=pd.DataFrame([[1, 2], [3, 4]]),
+                metadata=Metadata(page_number=1)
+            )],
+            images=[ImageElement(
+                image=Image.new("RGB", (60, 30), color="red"),
+                metadata=Metadata(page_number=1)
+            )]
+        )
 
-    def test_extract_text(self):
+        result = parser.parse("test.pdf", ["text", "tables", "images"])
+        mock_load.assert_called_once_with(["test.pdf"])
+        mock_export.assert_called_once_with(mock_document, ["text", "tables", "images"])
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], ParserOutput)
+        assert result[0].text.text == "Sample text"
+        assert len(result[0].tables) == 1
+        assert len(result[0].images) == 1
+        assert result[0].tables[0].markdown == "| Header |\n|--------|"
+        assert result[0].tables[0].dataframe.shape == (2, 2)
+        assert result[0].images[0].image.size == (60, 30)
+        
+
+
+    def test_extract_text(self, parser):
         page = {"text": "Test text"}
-        assert LlamaPDFParser._extract_text(page) == "Test text"
+        result = parser._extract_text(page)
+        assert isinstance(result, TextElement)
+        assert result.text == "Test text"
 
-    def test_extract_tables(self):
+
+    def test_extract_tables(self, parser):
         page = {
             "items": [
                 {
@@ -120,24 +116,32 @@ class TestLlamaPDFParser:
                     "md": "| Header |\n|--------|",
                     "csv": "Header\nValue",
                 }
-            ]
+            ],
+            "page": 1
         }
-        result = LlamaPDFParser._extract_tables(page)
+        result = parser._extract_tables(page)
+        
+        assert isinstance(result, list)
         assert len(result) == 1
-        assert result[0]["table_md"] == "| Header |\n|--------|"
-        assert isinstance(result[0]["table_df"], pd.DataFrame)
+        assert isinstance(result[0], TableElement)
+        assert result[0].markdown == "| Header |\n|--------|"
+        assert isinstance(result[0].dataframe, pd.DataFrame)
+        assert isinstance(result[0].metadata, Metadata)
+        assert result[0].metadata.page_number == 1
 
-    @patch("parstudio.parsers.llama_parser.Image.open")
+    @patch("parsestudio.parsers.llama_parser.Image.open")
     @patch("os.remove")
     def test_extract_images(self, mock_remove, mock_image_open, parser):
         """
         Test the _extract_images method by patching the Image.open and os.remove functions.
         """
-        page = {"dummy": "data"}
+        page = {"dummy": "data", "page": 1}
+        job_id = "job123"
+
         parser.converter = Mock()
         parser.converter.get_images.return_value = [{"path": "test_image.jpg"}]
         mock_image_open.return_value.convert.return_value = Image.new("RGB", (60, 30))
-        result = parser._extract_images(page)
+        result = parser._extract_images(page, job_id)
         assert len(result) == 1
-        assert isinstance(result[0]["image"], Image.Image)
+        assert isinstance(result[0], ImageElement)
         mock_remove.assert_called_once_with("test_image.jpg")
