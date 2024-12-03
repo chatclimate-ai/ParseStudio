@@ -16,6 +16,11 @@ import sys
 class DoclingPDFParser:
     """
     Parse a PDF file using the Docling Parser
+
+    Args:
+        pipeline_options (PdfPipelineOptions): Options for the PDF pipeline. 
+        backend (Union[DoclingParseDocumentBackend, PyPdfiumDocumentBackend]): Backend to use for parsing the PDF.
+
     """
 
     def __init__(
@@ -55,6 +60,16 @@ class DoclingPDFParser:
             max_file_size: int = sys.maxsize,
         ) -> Generator[ConversionResult, None, None]:
         """
+        Load the documents from the given paths and convert them to DoclingDocument objects.
+
+        Args:
+            paths (List[str]): List of paths to the documents
+            raises_on_error (bool): Whether to raise an error if the conversion fails. Default is True
+            max_num_pages (int): Maximum number of pages to convert. Default is sys.maxsize
+            max_file_size (int): Maximum file size to convert. Default is sys.maxsize
+        
+        Returns:
+            result (Generator[ConversionResult, None, None]): Generator of ConversionResult objects
         """
        
         yield from self.converter.convert_all(
@@ -66,6 +81,13 @@ class DoclingPDFParser:
 
     def _validate_modalities(self, modalities: List[str]) -> None:
         """
+        Validate the modalities provided by the user. The valid modalities are: ["text", "tables", "images"]
+
+        Args:
+            modalities (List[str]): List of modalities to validate
+
+        Raises:
+            ValueError: If the modality is not valid
         """
         valid_modalities = ["text", "tables", "images"]
         for modality in modalities:
@@ -81,6 +103,52 @@ class DoclingPDFParser:
             **kwargs,
         ) -> List[ParserOutput]:
         """
+        Parse the documents and extract the specified modalities.
+
+        Args:
+            paths (Union[str, List[str]]): Path or list of paths to the documents
+            modalities (List[str]): List of modalities to extract. Default is ["text", "tables", "images"]
+            **kwargs: Keyword arguments to pass to the export_to_markdown method. For example, markdown_options={"image_placeholder": "<image>"}
+        
+        Returns:
+            data (List[ParserOutput]): List of ParserOutput objects
+        
+        Raises:
+            ValueError: If the modality is not valid
+        
+        Examples:
+        !!! example
+            ```python
+            parser = DoclingPDFParser()
+            data = parser.parse("path/to/document.pdf", modalities=["text", "tables", "images"])
+            print(len(data)) 
+            # Output: 1
+            text = data[0].text # TextElement
+            tables = data[0].tables # List of TableElement
+            images = data[0].images # List of ImageElement
+
+            # Access the text
+            text = text.text
+
+
+            # Access the first table
+            table = tables[0]
+            # Access the markdown representation of the table
+            table_md = table.markdown
+            # Access the dataframe representation of the table
+            table_df = table.dataframe
+            # Access the metadata of the table
+            page_number = table.metadata.page_number
+            bbox = table.metadata.bbox
+
+            # Access the first image
+            image = images[0]
+            # Access the image object
+            image_obj = image.image # PIL Image object
+            # Access the metadata of the image
+            page_number = image.metadata.page_number
+            bbox = image.metadata.bbox
+            ```
         """
         self._validate_modalities(modalities)
 
@@ -111,6 +179,15 @@ class DoclingPDFParser:
             markdown_options: dict,
         ) -> ParserOutput:
         """
+        Export the result the ParserOutput object.
+
+        Args:
+            document (DoclingDocument): DoclingDocument object
+            modalities (List[str]): List of modalities to extract
+            markdown_options (dict): Options to pass to the export_to_markdown method
+        
+        Returns:
+            output (ParserOutput): ParserOutput object
         """
         text = TextElement(text="")
         tables: List[TableElement] = []
@@ -132,6 +209,24 @@ class DoclingPDFParser:
     @staticmethod
     def _extract_tables(item: TableItem) -> List[TableElement]:
         """
+        Extract the tables from the TableItem object.
+
+        Args:
+            item (TableItem): TableItem object
+        
+        Returns:
+            tables (List[TableElement]): List of TableElement objects
+        
+        Examples:
+        !!! example
+            ```python
+            parser = DoclingPDFParser()
+            table = parser._extract_tables(table_item)[0]
+            table_md = table.markdown
+            table_df = table.dataframe
+            page_number = table.metadata.page_number
+            bbox = table.metadata.bbox
+            ```
         """
         table_md: str = item.export_to_markdown()
         table_df: pd.DataFrame = item.export_to_dataframe()
@@ -149,6 +244,24 @@ class DoclingPDFParser:
     @staticmethod
     def _extract_images(item: PictureItem, doc: DoclingDocument) -> List[ImageElement]:
         """
+        Extract the images from the PictureItem object.
+
+        Args:
+            item (PictureItem): PictureItem object
+            doc (DoclingDocument): DoclingDocument object
+        
+        Returns:
+            images (List[ImageElement]): List of ImageElement objects
+        
+        Examples:
+        !!! example
+            ```python
+            parser = DoclingPDFParser()
+            image = parser._extract_images(picture_item, doc)[0]
+            image_obj = image.image
+            page_number = image.metadata.page_number
+            bbox = image.metadata.bbox
+            ``` 
         """
         image: Image.Image = item.get_image(doc)
         if image is None:
@@ -169,5 +282,23 @@ class DoclingPDFParser:
             markdown_options: dict,
             ) -> TextElement:
         """
+        Extract the text from the DoclingDocument object.
+
+        Args:
+            item (DoclingDocument): DoclingDocument object
+            markdown_options (dict): Options to pass to the export_to_markdown method
+        
+        Returns:
+            text (TextElement): TextElement object
+        
+        Examples:
+        !!! example
+            ```python
+            parser = DoclingPDFParser()
+            text = parser._extract_text(doc, markdown_options= {
+                "image_mode": ImageRefMode.EMBEDDED # embed the images in the markdown
+            })
+            text = text.text
+            ```
         """
         return TextElement(text=item.export_to_markdown(**markdown_options))
