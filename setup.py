@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="parsestudio",
-    version="0.1.0",
+    version="1.0.2",
     author="Imene KOLLI",
     author_email="imene.kolli@df.uzh.ch",
     description="Parse PDF files using different parsers.",

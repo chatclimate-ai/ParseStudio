@@ -17,7 +17,7 @@ To run the parser, you can use the `run` method of the PDFParser module.
 ## Basic Usage
 
 ```python
-from parsestudio import PDFParser
+from parsestudio.parse import PDFParser
 
 parser = PDFParser(name="docling")
 output = parser.run("path/to/pdf/file")

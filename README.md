@@ -34,7 +34,7 @@ pip install .
 ### 1. Import and Initialize the Parser
 
 ```python
-from parsestudio import PDFParser
+from parsestudio.parse import PDFParser
 
 # Initialize with the desired parser backend
 parser = PDFParser(parser="docling")  # Options: "docling", "pymupdf", "llama"

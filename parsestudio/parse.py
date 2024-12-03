@@ -52,7 +52,7 @@ class PDFParser:
 
         !!! example
             ```python
-            from parsestudio import PDFParser
+            from parsestudio.parse import PDFParser
             
             # Initialize the parser
             parser = PDFParser(parser="docling")
