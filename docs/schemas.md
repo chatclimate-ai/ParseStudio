@@ -1,11 +1,6 @@
-# The Docling Parser
-
-The Docling parser uses docling under the hood to parse pdfs and extract text from them. It is a simple wrapper around the docling library that provides a more user-friendly interface.
-
-## Documentation
-:::parsestudio.parsers.docling_parser
+:::parsestudio.parsers.schemas
     rendering:
-        show_root_heading: true
+        show_root_heading: false
         show_source: true
         show_sources: true
         show_source_type: true
@@ -15,4 +10,3 @@ The Docling parser uses docling under the hood to parse pdfs and extract text fr
         show_object_attributes: true
         show_object_parameters: true
         show_inherited_methods: true
-

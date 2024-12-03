@@ -3,7 +3,7 @@
 The Llama parser uses llama under the hood to parse pdfs and extract text from them. It is a simple wrapper around the llama library that provides a more user-friendly interface.
 
 ## Documentation
-:::parstudio.parsers.llama_parser
+:::parsestudio.parsers.llama_parser
     rendering:
         show_root_heading: true
         show_source: true

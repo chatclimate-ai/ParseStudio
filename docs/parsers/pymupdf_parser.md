@@ -3,7 +3,7 @@
 The PymuPDF parser uses pymupdf under the hood to parse pdfs and extract text from them. It is a simple wrapper around the pymupdf library that provides a more user-friendly interface.
 
 ## Documentation
-:::parstudio.parsers.pymupdf_parser
+:::parsestudio.parsers.pymupdf_parser
     rendering:
         show_root_heading: true
         show_source: true
