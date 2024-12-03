@@ -49,25 +49,71 @@ class PDFParser:
             List[ParserOutput]: The parsed output(s) from the PDF file(s).
         
         Examples:
-            >>> parser = PDFParser(parser="docling")
-            >>> outputs = parser.run("path/to/file.pdf", backend="docling")
-            >>> print(len(outputs))
-            1
-            >>> print(outputs[0].text)
-            "This is the extracted text from the PDF file."
-            >>> for table in outputs[0].tables:
-            ...     metadata = table.metadata
-            ...     markdown_table = table.markdown
-            ...     pandas_dataframe = table.dataframe
-            ...     print(metadata)
-            ...     print(markdown_table)
-            ...     break
-            Metadata(page_number=1, bbox=[0, 0, 100, 100])
-            | Column 1 | Column 2 |
-            |----------|----------|
-            | Value 1  | Value 2  |
-            | Value 3  | Value 4  |
+
+        !!! example
+            ```python
+            # Initialize the parser
+            parser = PDFParser(parser="docling")
+
+            # Parse the PDF file
+            outputs = parser.run("path/to/file.pdf", backend="docling")
+            print(len(outputs))  # Number of PDF files
+            # Output: 1
+
+            # Access text content
+            print(outputs[0].text)
+            # Output: text='Hello, World!'
+
+            # Access tables
+            print(outputs[0].tables)
+            # Output:
+            # [
+            #     TableElement(
+            #         markdown='| Column 1 | Column 2 |
+            #                   |----------|----------|
+            #                   | Value 1  | Value 2  |
+            #                   | Value 3  | Value 4  |',
+            #         dataframe=  Column 1  Column 2
+            #                     0  Value 1  Value 2
+            #                     1  Value 3  Value 4,
+            #         metadata=Metadata(page_number=1, bbox=[0, 0, 100, 100])
+            #     )
+            # ]
+
+            for table in outputs[0].tables:
+                metadata = table.metadata
+                markdown_table = table.markdown
+                pandas_dataframe = table.dataframe
+                print(metadata)
+                print(markdown_table)
+            # Output:
+            # Metadata(page_number=1, bbox=[0, 0, 100, 100])
+            # | Column 1 | Column 2 |
+            # |----------|----------|
+            # | Value 1  | Value 2  |
+            # | Value 3  | Value 4  |
+
+            # Access images
+            print(outputs[0].images)
+            # Output:
+            # [
+            #     ImageElement(
+            #         image=<PIL.Image.Image image mode=RGB size=233x140 at 0x16E894E50>,
+            #         metadata=Metadata(page_number=1, bbox=[0, 0, 100, 100])
+            #     )
+            # ]
+
+            for image in outputs[0].images:
+                metadata = image.metadata
+                image = image.image
+                print(metadata)
+                image.show()
+            # Output:
+            # Metadata(page_number=1, bbox=[0, 0, 100, 100])
+            # [Image shown]
+            ```
         """
+     
 
         outputs = self.parser.parse(
             pdf_path, 
