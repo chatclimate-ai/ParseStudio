@@ -7,6 +7,14 @@ import PIL.Image as Image
 
 
 class Metadata(BaseModel):
+    """
+    Metadata of the element.
+    
+    Attributes:
+        page_number (int): The page number where the element is located.
+        bbox (List[float]): Bounding box coordinates of the element.
+
+    """
     page_number: int = Field(None, description="The page number where the element is located.")
     bbox: List[float] = Field(None, description="Bounding box coordinates of the element.")
 
@@ -24,6 +32,14 @@ class Metadata(BaseModel):
 
 
 class TableElement(BaseModel):
+    """
+    Table element.
+    
+    Attributes:
+        markdown (str): The markdown representation of the table.
+        dataframe (pd.DataFrame): The pandas DataFrame representation of the table.
+        metadata (Metadata): Metadata of the table.
+    """
     markdown: str = Field(None, description="The markdown representation of the table.")
     dataframe: pd.DataFrame = Field(None, description="The pandas DataFrame representation of the table.")
     metadata: Metadata = Field(..., description="Metadata of the table.")
@@ -50,6 +66,13 @@ class TableElement(BaseModel):
     
 
 class ImageElement(BaseModel):
+    """
+    Image element.
+
+    Attributes:
+        image (Image.Image): The image element.
+        metadata (Metadata): Metadata of the image element.
+    """
     image: Image.Image = Field(..., description="The image element.")
     metadata: Metadata = Field(..., description="Metadata of the image element.")
 
@@ -69,6 +92,12 @@ class ImageElement(BaseModel):
 
 
 class TextElement(BaseModel):
+    """
+    Text element.
+
+    Attributes:
+        text (str): The text element.
+    """
     text: str = Field(..., description="The text element.")
 
     @field_validator("text")
@@ -78,6 +107,14 @@ class TextElement(BaseModel):
         return text
 
 class ParserOutput(BaseModel):
+    """
+    Parser output.
+
+    Attributes:
+        text (TextElement): The text element.
+        tables (List[TableElement]): List of table elements.
+        images (List[ImageElement]): List of image elements.
+    """
     text: TextElement = Field(None, description="The text element.")
     tables : List[TableElement] = Field(None, description="List of table elements.")
     images: List[ImageElement] = Field(None, description="List of image elements.")
