@@ -45,13 +45,16 @@ plugins:
 
 nav:
   - Home:
-    - Welcome to Parse Studio: index.md
+    - Welcome to Parse Studio: 
+      - Installation: installation.md
+      - Introduction: index.md
   - Docling Parser:
       - Overview: parsers/docling_parser.md
   - Llama Parser:
       - Overview: parsers/llama_parser.md
-  - PmuPDF Parser:
+  - PymuPDF Parser:
       - Overview: parsers/pymupdf_parser.md
+  - Schemas: schemas.md
 
 
 
