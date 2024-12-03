@@ -56,7 +56,7 @@ class PDFParser:
             parser = PDFParser(parser="docling")
 
             # Parse the PDF file
-            outputs = parser.run("path/to/file.pdf", backend="docling")
+            outputs = parser.run("path/to/file.pdf")
             print(len(outputs))  # Number of PDF files
             # Output: 1
 
