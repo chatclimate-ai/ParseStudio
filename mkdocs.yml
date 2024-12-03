@@ -1,7 +1,12 @@
-site_name: Parse Studio
+site_name: ParseStudio
 
 theme:
   name: material
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    logo: material/tree
   features:
     - navigation.tabs
     - navigation.sections
@@ -39,7 +44,12 @@ plugins:
   - search:
       lang: en
   - mkdocstrings:
-      default_handler: python
+      handlers:
+        python:
+          options:
+            filters: [""]
+            show_root_heading: false
+            show_root_toc_entry: false
   - autorefs
 
 
