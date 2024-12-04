@@ -9,10 +9,8 @@
       
       
       
-        <link rel="prev" href="installation/">
       
-      
-        <link rel="next" href="parsers/docling_parser/">
+        <link rel="next" href="installation/">
       
       
       <link rel="icon" href="assets/images/favicon.png">
@@ -217,7 +215,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="installation/" class="md-tabs__link">
+        <a href="." class="md-tabs__link">
           
   
   Home
@@ -431,27 +429,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Installation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -564,6 +541,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -827,16 +825,19 @@
 <h2 id="entry-point">Entry Point</h2>
 <p>The entry point for the <code>parsestudio</code> library is the PDFParser module, 
 that acts as the main interface for the library. </p>
-<p>The PDFParser module initializes the parser and provides a method to parse a PDF file.
-Which could be either:
-- A DoclingParser
-- A PymuPDFParser
-- A LlmapParser</p>
-<p>To run the parser, you can use the <code>run</code> method of the PDFParser module.</p>
+<p>The PDFParser module initializes the parser and provides a backend to parse a PDF file.
+Which could be either:</p>
+<ul>
+<li><strong><a href="https://github.com/DS4SD/docling">Docling</a></strong>: Advanced parser with multimodal capabilities.</li>
+<li><strong><a href="https://github.com/pymupdf/PyMuPDF">PyMuPDF</a></strong>: Lightweight and efficient.</li>
+<li><strong><a href="https://github.com/run-llama/llama_parse">LlamaParse</a></strong>: AI-enhanced parser with advanced capabilities.</li>
+</ul>
+<p>Each backend parser has its own strengths. Choose the one that best fits your use case.</p>
 <h2 id="basic-usage">Basic Usage</h2>
+<p>To run the parser, you can use the <code>run</code> method of the PDFParser module.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">parsestudio.parse</span> <span class="kn">import</span> <span class="n">PDFParser</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">parser</span> <span class="o">=</span> <span class="n">PDFParser</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;docling&quot;</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">parser</span> <span class="o">=</span> <span class="n">PDFParser</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;docling&quot;</span><span class="p">)</span> <span class="c1"># or &quot;pymupdf&quot; or &quot;llama&quot;</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">output</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;path/to/pdf/file&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="documentation">Documentation</h2>
@@ -1018,14 +1019,14 @@ Which could be either:
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a>            <span class="bp">self</span><span class="p">,</span> 
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a>            <span class="n">parser</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;docling&quot;</span><span class="p">,</span> <span class="s2">&quot;llama&quot;</span><span class="p">,</span> <span class="s2">&quot;pymupdf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;docling&quot;</span><span class="p">,</span> 
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>            <span class="n">parser_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>            <span class="n">parser_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a>            <span class="p">):</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">        Initialize the PDF parser with the specified backend.</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">        Args:</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">            parser (str): The parser backend to use. Options are &#39;docling&#39; and &#39;llama&#39;, and &#39;pymupdf&#39;. Defaults to &#39;docling&#39;.</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">            parser_kwargs: Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information. Defaults to {}.</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">            parser_kwargs (dict): Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information.</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">        Raises:</span>
 </span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">            ValueError: If an invalid parser is specified.</span>
@@ -1056,7 +1057,7 @@ Which could be either:
 </span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">            **kwargs: Additional keyword arguments to pass to &#39;docling&#39; parser. Check the documentation of the parser for more information.</span>
 </span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a>
 </span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">        Returns:</span>
-</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">            List[ParserOutput]: The parsed output(s) from the PDF file(s).</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">            The parsed output(s) from the PDF file(s).</span>
 </span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a>
 </span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">        Examples:</span>
 </span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>
@@ -1194,10 +1195,11 @@ Which could be either:
                 <code>parser_kwargs</code>
             </td>
             <td>
+                  <code>dict</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information. Defaults to {}.</p>
+                <p>Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information.</p>
               </div>
             </td>
             <td>
@@ -1259,14 +1261,14 @@ Which could be either:
 <span class="normal"><a href="#__codelineno-0-36">36</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a>        <span class="bp">self</span><span class="p">,</span> 
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a>        <span class="n">parser</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;docling&quot;</span><span class="p">,</span> <span class="s2">&quot;llama&quot;</span><span class="p">,</span> <span class="s2">&quot;pymupdf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;docling&quot;</span><span class="p">,</span> 
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>        <span class="n">parser_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>        <span class="n">parser_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a>        <span class="p">):</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    Initialize the PDF parser with the specified backend.</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    Args:</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">        parser (str): The parser backend to use. Options are &#39;docling&#39; and &#39;llama&#39;, and &#39;pymupdf&#39;. Defaults to &#39;docling&#39;.</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        parser_kwargs: Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information. Defaults to {}.</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        parser_kwargs (dict): Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information.</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Raises:</span>
 </span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        ValueError: If an invalid parser is specified.</span>
@@ -1378,7 +1380,7 @@ Which could be either:
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List[ParserOutput]: The parsed output(s) from the PDF file(s).</p>
+                <p>The parsed output(s) from the PDF file(s).</p>
               </div>
             </td>
           </tr>
@@ -1559,7 +1561,7 @@ Which could be either:
 </span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        **kwargs: Additional keyword arguments to pass to &#39;docling&#39; parser. Check the documentation of the parser for more information.</span>
 </span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a>
 </span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    Returns:</span>
-</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        List[ParserOutput]: The parsed output(s) from the PDF file(s).</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        The parsed output(s) from the PDF file(s).</span>
 </span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a>
 </span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    Examples:</span>
 </span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>

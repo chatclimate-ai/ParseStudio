@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../..">
+        <link rel="prev" href="../../installation/">
       
       
         <link rel="next" href="../llama_parser/">
@@ -213,7 +213,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../installation/" class="md-tabs__link">
+        <a href="../.." class="md-tabs__link">
           
   
   Home
@@ -422,11 +422,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/" class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Installation
+    Introduction
   </span>
   
 
@@ -443,11 +443,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Introduction
+    Installation
   </span>
   
 
@@ -844,7 +844,7 @@
 
 
 <h1 id="the-docling-parser">The Docling Parser</h1>
-<p>The Docling parser uses docling under the hood to parse pdfs and extract text from them. It is a simple wrapper around the docling library that provides a more user-friendly interface.</p>
+<p>The Docling parser uses docling under the hood to parse pdfs and extract text from them. It is a wrapper around the docling library that provides a more user-friendly interface.</p>
 <h2 id="documentation">Documentation</h2>
 
 
@@ -1246,14 +1246,14 @@
 </span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a>                <span class="n">do_table_structure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a>                <span class="n">table_structure_options</span><span class="o">=</span> <span class="n">TableStructureOptions</span><span class="p">(</span>
 </span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>                    <span class="n">do_cell_matching</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>                    <span class="n">mode</span><span class="o">=</span> <span class="n">TableFormerMode</span><span class="o">.</span><span class="n">ACCURATE</span><span class="p">,</span> <span class="c1"># Or TableFormerMode.FAST</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>                    <span class="n">mode</span><span class="o">=</span> <span class="n">TableFormerMode</span><span class="o">.</span><span class="n">ACCURATE</span>
 </span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>                <span class="p">),</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>                <span class="n">ocr_options</span><span class="o">=</span> <span class="n">EasyOcrOptions</span><span class="p">(</span> <span class="c1"># Or TesseractCliOcrOptions or TesseractOcrOptions</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>                <span class="n">ocr_options</span><span class="o">=</span> <span class="n">EasyOcrOptions</span><span class="p">(</span>
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>                    <span class="n">force_full_page_ocr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>                    <span class="n">use_gpu</span><span class="o">=</span><span class="kc">False</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>                <span class="p">),</span> <span class="c1"># Other options: lang, ...</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>                <span class="n">images_scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="c1"># Needed to extract images</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>                <span class="n">generate_picture_images</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Needed to extract images</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>                <span class="p">),</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>                <span class="n">images_scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>                <span class="n">generate_picture_images</span><span class="o">=</span><span class="kc">True</span>
 </span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>            <span class="p">),</span>
 </span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>            <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">DoclingParseDocumentBackend</span><span class="p">,</span> <span class="n">PyPdfiumDocumentBackend</span><span class="p">]]</span> <span class="o">=</span> <span class="n">DoclingParseDocumentBackend</span>
 </span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>            <span class="p">):</span>
