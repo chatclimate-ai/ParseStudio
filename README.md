@@ -43,21 +43,21 @@ parser = PDFParser(parser="docling")  # Options: "docling", "pymupdf", "llama"
 ### 2. Parse a PDF File
 
 ```python
-outputs = parser.run("path/to/file.pdf", modalities=["text", "tables", "images"])
+outputs = parser.run(["path/to/file.pdf"], modalities=["text", "tables", "images"])
 
 # Access text content
 print(outputs[0].text)
 # Output: text="This is the extracted text content from the PDF file."
 
 # Access tables
-for table in outputs[0].tables[0]:
+for table in outputs[0].tables:
     print(table.markdown)
 # Output: | Header 1 | Header 2 |
 #         |----------|----------|
 #         | Value 1  | Value 2  |
 
 # Access images
-for image in outputs[0].images[0]:
+for image in outputs[0].images:
     image.image.show()
     metadata = image.metadata
     print(metadata)
@@ -79,10 +79,7 @@ Each parser has its own strengths. Choose the one that best fits your use case.
 If you choose to use the LlamaPDFParser, you need to set up an API key. Follow these steps:
 
 1. Create a `.env` File: In the root directory of your project, create a file named `.env`.
-2. Add Your API Key: Add the following line to the .env file, replacing your-api-key with your Llmap API key:
-    ```bash
-   LLAMA_API_KEY=your-api-key
-   ```
+2. Add Your API Key: Add the following line to the .env file, replacing your-api-key with your Llmap API key: `LLAMA_API_KEY=your-api-key`
 
 ## Contributing
 
