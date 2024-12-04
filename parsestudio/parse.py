@@ -1,7 +1,7 @@
 from .parsers.docling_parser import DoclingPDFParser
 from .parsers.llama_parser import LlamaPDFParser
 from .parsers.pymupdf_parser import PyMuPDFParser
-from typing import Literal, List, Union
+from typing import Literal, List, Union, Dict, Type
 from .parsers.schemas import ParserOutput
 
 
@@ -9,6 +9,12 @@ class PDFParser:
     """
     Parse PDF files using different parsers.
     """
+
+    PARSER_MAP: Dict[str, Type] = {
+        "docling": DoclingPDFParser,
+        "llama": LlamaPDFParser,
+        "pymupdf": PyMuPDFParser
+    }
     def __init__(
             self, 
             parser: Literal["docling", "llama", "pymupdf"] = "docling", 
@@ -24,16 +30,13 @@ class PDFParser:
         Raises:
             ValueError: If an invalid parser is specified.
         """
-        if parser == "docling":
-            self.parser = DoclingPDFParser(**parser_kwargs)
-        elif parser == "llama":
-            self.parser = LlamaPDFParser(parser_kwargs)
-        elif parser == "pymupdf":
-            self.parser = PyMuPDFParser()
-        else:
+        parser = parser.lower()
+        parser_class = self.PARSER_MAP.get(parser)
+        if not parser_class:
             raise ValueError(
-                "Invalid parser specified. Please use 'docling', 'llama', or 'pymupdf'."
+                f"Invalid parser: '{parser}'. Valid options are: {list(self.PARSER_MAP.keys())}"
             )
+        self.parser = parser_class(**parser_kwargs)
 
     def run(
             self, 
