@@ -56,8 +56,8 @@ plugins:
 nav:
   - Home:
     - Welcome to Parse Studio: 
-      - Installation: installation.md
       - Introduction: index.md
+      - Installation: installation.md
   - Docling Parser:
       - Overview: parsers/docling_parser.md
   - Llama Parser:

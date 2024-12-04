@@ -6,20 +6,25 @@
 The entry point for the `parsestudio` library is the PDFParser module, 
 that acts as the main interface for the library. 
 
-The PDFParser module initializes the parser and provides a method to parse a PDF file.
+The PDFParser module initializes the parser and provides a backend to parse a PDF file.
 Which could be either:
-- A DoclingParser
-- A PymuPDFParser
-- A LlmapParser
 
-To run the parser, you can use the `run` method of the PDFParser module.
+- **[Docling](https://github.com/DS4SD/docling)**: Advanced parser with multimodal capabilities.
+- **[PyMuPDF](https://github.com/pymupdf/PyMuPDF)**: Lightweight and efficient.
+- **[LlamaParse](https://github.com/run-llama/llama_parse)**: AI-enhanced parser with advanced capabilities.
+
+Each backend parser has its own strengths. Choose the one that best fits your use case.
+
+
 
 ## Basic Usage
+
+To run the parser, you can use the `run` method of the PDFParser module.
 
 ```python
 from parsestudio.parse import PDFParser
 
-parser = PDFParser(name="docling")
+parser = PDFParser(name="docling") # or "pymupdf" or "llama"
 output = parser.run("path/to/pdf/file")
 ```
 
