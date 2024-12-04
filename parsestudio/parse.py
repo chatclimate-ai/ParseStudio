@@ -12,14 +12,14 @@ class PDFParser:
     def __init__(
             self, 
             parser: Literal["docling", "llama", "pymupdf"] = "docling", 
-            parser_kwargs = {}
+            parser_kwargs: dict = {}
             ):
         """
         Initialize the PDF parser with the specified backend.
 
         Args:
             parser (str): The parser backend to use. Options are 'docling' and 'llama', and 'pymupdf'. Defaults to 'docling'.
-            parser_kwargs: Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information. Defaults to {}.
+            parser_kwargs (dict): Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information.
 
         Raises:
             ValueError: If an invalid parser is specified.
@@ -50,7 +50,7 @@ class PDFParser:
             **kwargs: Additional keyword arguments to pass to 'docling' parser. Check the documentation of the parser for more information.
         
         Returns:
-            List[ParserOutput]: The parsed output(s) from the PDF file(s).
+            The parsed output(s) from the PDF file(s).
         
         Examples:
 
