@@ -9,13 +9,17 @@ class PDFParser:
     """
     Parse PDF files using different parsers.
     """
-    def __init__(self, parser: Literal["docling", "llama", "pymupdf"] = "docling", **parser_kwargs):
+    def __init__(
+            self, 
+            parser: Literal["docling", "llama", "pymupdf"] = "docling", 
+            parser_kwargs = {}
+            ):
         """
-        Initialize the PDF parser with the specified parser.
+        Initialize the PDF parser with the specified backend.
 
         Args:
-            parser (str): The parser to use. Options are 'docling' and 'llama', and 'pymupdf'. Defaults to 'docling'.
-            **parser_kwargs: Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information.
+            parser (str): The parser backend to use. Options are 'docling' and 'llama', and 'pymupdf'. Defaults to 'docling'.
+            parser_kwargs: Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information. Defaults to {}.
 
         Raises:
             ValueError: If an invalid parser is specified.
@@ -23,7 +27,7 @@ class PDFParser:
         if parser == "docling":
             self.parser = DoclingPDFParser(**parser_kwargs)
         elif parser == "llama":
-            self.parser = LlamaPDFParser(**parser_kwargs)
+            self.parser = LlamaPDFParser(parser_kwargs)
         elif parser == "pymupdf":
             self.parser = PyMuPDFParser()
         else:
@@ -43,7 +47,7 @@ class PDFParser:
         Args:
             pdf_path (str or List[str]): The path to the PDF file(s) to parse.
             modalities (List[str]): The modalities to extract from the PDF file(s). Defaults to ["text", "tables", "images"].
-            **kwargs: Additional keyword arguments to pass to 'docling' parser.
+            **kwargs: Additional keyword arguments to pass to 'docling' parser. Check the documentation of the parser for more information.
         
         Returns:
             List[ParserOutput]: The parsed output(s) from the PDF file(s).
