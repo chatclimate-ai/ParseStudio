@@ -1,6 +1,7 @@
 from .parsers.docling_parser import DoclingPDFParser
 from .parsers.llama_parser import LlamaPDFParser
 from .parsers.pymupdf_parser import PyMuPDFParser
+from .parsers.anthropic_parser import AnthropicPDFParser  # Added import
 from typing import Literal, List, Union, Dict, Type
 from .parsers.schemas import ParserOutput
 
@@ -13,18 +14,19 @@ class PDFParser:
     PARSER_MAP: Dict[str, Type] = {
         "docling": DoclingPDFParser,
         "llama": LlamaPDFParser,
-        "pymupdf": PyMuPDFParser
+        "pymupdf": PyMuPDFParser,
+        "anthropic": AnthropicPDFParser  # Added to parser map
     }
     def __init__(
             self, 
-            parser: Literal["docling", "llama", "pymupdf"] = "docling", 
+            parser: Literal["docling", "llama", "pymupdf", "anthropic"] = "docling",  # Added anthropic to Literal
             parser_kwargs: dict = {}
             ):
         """
         Initialize the PDF parser with the specified backend.
 
         Args:
-            parser (str): The parser backend to use. Options are 'docling' and 'llama', and 'pymupdf'. Defaults to 'docling'.
+            parser (str): The parser backend to use. Options are 'docling' and 'llama', 'pymupdf', and 'anthropic'. Defaults to 'docling'.
             parser_kwargs (dict): Additional keyword arguments to pass to the parser. Check the documentation of the parser for more information.
 
         Raises:
