@@ -21,12 +21,12 @@ class TestAnthropicPDFParser:
             assert parser.options == anthropic_options
 
     def test_load_documents(self, parser):
-        parser.client = Mock()
+        parser.client.beta = Mock()
         mock_response = Mock()
-        mock_response.content = json.dumps({"text_content": "test", "tables": []})
-        parser.client.messages.create.return_value = mock_response
+        mock_response.content = [Mock(text="test")]
+        parser.client.beta.messages.create.return_value = mock_response
         
-        with patch("builtins.open", mock_open(read_data="test")):
+        with patch("builtins.open", mock_open(read_data=b"test")):
             result = list(parser.load_documents(["test.pdf"]))
             assert len(result) == 1
             assert result[0]["text_content"] == "test"
@@ -36,7 +36,7 @@ class TestAnthropicPDFParser:
         with pytest.raises(ValueError):
             parser._validate_modalities(["invalid"])
 
-    @patch("builtins.open", mock_open(read_data="test"))
+    @patch("builtins.open", mock_open(read_data=b"test"))
     @patch.object(AnthropicPDFParser, "load_documents")
     @patch.object(AnthropicPDFParser, "_AnthropicPDFParser__export_result")
     def test_parse(self, mock_export, mock_load, parser):
@@ -51,7 +51,7 @@ class TestAnthropicPDFParser:
         mock_export.return_value = ParserOutput(
             text=TextElement(text="Sample text"),
             tables=[TableElement(
-                markdown="| Header |\n|--------|", 
+                markdown="| Header |\n|--------|",
                 dataframe=pd.DataFrame(),
                 metadata=Metadata(page_number=1)
             )],

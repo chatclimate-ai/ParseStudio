@@ -6,6 +6,7 @@ from io import BytesIO, StringIO
 from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
 import json
 import os
+import base64
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,8 +24,9 @@ class AnthropicPDFParser:
     def __init__(
             self,
             anthropic_options: Optional[Dict] = {
-                "max_tokens": 4096,
-                "model": "claude-3-sonnet-20240229"
+                "max_tokens": 1024,
+                "model": "claude-3-5-sonnet-20241022",
+                "betas": ["pdfs-2024-09-25"]
             }
             ):
         try:
@@ -44,23 +46,45 @@ class AnthropicPDFParser:
             result (Generator[Dict, None, None]): Generator yielding parsed document data
         """
         for path in paths:
-            with open(path, 'rb') as f:
-                response = self.client.messages.create(
-                    model=self.options.get("model", "claude-3-sonnet-20240229"),
-                    max_tokens=self.options.get("max_tokens", 4096),
+            try:
+                with open(path, "rb") as pdf_file:
+                    pdf_data = base64.standard_b64encode(pdf_file.read()).decode("utf-8")
+
+                response = self.client.beta.messages.create(
+                    model=self.options.get("model", "claude-3-5-sonnet-20241022"),
+                    betas=self.options.get("betas", ["pdfs-2024-09-25"]),
+                    max_tokens=self.options.get("max_tokens", 1024),
                     messages=[{
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": "Extract and structure this PDF's content with: text_content, tables (as markdown with page numbers), images not needed."},
-                            {"type": "file", "file_path": path}
-                        ],
+                            {
+                                "type": "document",
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": "application/pdf",
+                                    "data": pdf_data
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Extract and structure this PDF's content with: text_content and tables (as markdown with page numbers)"
+                            }
+                        ]
                     }]
                 )
+                
                 try:
-                    result = json.loads(response.content)
+                    result = {
+                        "text_content": response.content[0].text,
+                        "tables": []  # Tables will be extracted from the text content
+                    }
                 except:
-                    result = {"text_content": response.content, "tables": []}
+                    result = {"text_content": str(response.content), "tables": []}
+                
                 yield result
+            except Exception as e:
+                print(f"Error processing file {path}: {str(e)}")
+                yield {"text_content": "", "tables": []}
 
     def _validate_modalities(self, modalities: List[str]) -> None:
         """
