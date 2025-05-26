@@ -161,3 +161,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 parstudio/
+
+# Ignore user-specific input and output files for local conversion script
+/input/
+/output/
