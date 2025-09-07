@@ -21,9 +21,5 @@ setup(
         "anthropic",
         "openai"
     ],
-    extras_require={
-        "openai-vision": ["pdf2image", "pillow"],
-        "all": ["pdf2image", "pillow", "PyCryptodome"]
-    },
     python_requires=">=3.12,<3.13",
 )

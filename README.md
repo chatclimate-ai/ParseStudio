@@ -39,9 +39,6 @@ from parsestudio.parse import PDFParser
 # Initialize with the desired parser backend
 parser = PDFParser(parser="docling")  # Options: "docling", "pymupdf", "llama", "anthropic", "openai"
 
-# For OpenAI parser, you can specify the approach:
-# parser = PDFParser(parser="openai", parser_kwargs={"approach": "file_search"})  # Default, recommended
-# parser = PDFParser(parser="openai", parser_kwargs={"approach": "vision"})       # For complex layouts
 ```
 
 ### 2. Parse a PDF File
@@ -102,17 +99,9 @@ If you choose to use the Llama, Anthropic, or OpenAI parsers, you need to set up
   - Note: Image extraction not currently supported due to API limitations
 - **OpenAI Parser**: 
   - Requires an OpenAI API key
-  - **Two approaches available**:
-    - `approach="file_search"` (default): Uses OpenAI's file search with text extraction
-    - `approach="vision"`: Uses GPT-4 Vision to analyze PDF pages as images
-  - **File Search approach**: More efficient, cheaper, faster - recommended for most use cases
-  - **Vision approach**: Better for documents with complex layouts, requires additional dependencies:
-    - Install: `pip install parsestudio[openai-vision]`
-    - Requires `pdf2image` and `poppler` for PDF processing
-    - Install poppler:
-      - Windows: Download from [poppler releases](https://github.com/oschwartz10612/poppler-windows/releases/)
-      - Linux: `sudo apt-get install poppler-utils`
-      - Mac: `brew install poppler`
+  - Uses OpenAI's file search with vector embeddings for efficient PDF processing
+  - Automatically handles text extraction and table detection
+  - More efficient, cheaper, and faster than image-based approaches
 
 ## Contributing
 
