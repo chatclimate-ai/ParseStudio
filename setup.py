@@ -18,7 +18,12 @@ setup(
         "llama-parse>=0.5.14,<0.6.0",
         "pytest>=8.3.3,<9.0.0",
         "python-dotenv>=1.0.1,<2.0.0",
-        "anthropic"  
+        "anthropic",
+        "openai"
     ],
+    extras_require={
+        "openai-vision": ["pdf2image", "pillow"],
+        "all": ["pdf2image", "pillow", "PyCryptodome"]
+    },
     python_requires=">=3.12,<3.13",
 )
