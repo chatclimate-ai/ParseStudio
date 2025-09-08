@@ -6,7 +6,7 @@ Parsestudio is a powerful Python library for extracting and parsing content from
 
 ## Key Features
 
-- **Modular Design**: Choose between multiple parser backends (Docling, PymuPDF, Llama Parse) to suit your needs.
+- **Modular Design**: Choose between multiple parser backends (Docling, PymuPDF, Llama Parse, Anthropic Claude, OpenAI GPT-4 Vision) to suit your needs.
 - **Multimodal Parsing**: Extract text, tables, and images seamlessly.
 - **Extensible**: Easily adjust parsing behavior with additional parameters.
 
@@ -37,7 +37,8 @@ pip install .
 from parsestudio.parse import PDFParser
 
 # Initialize with the desired parser backend
-parser = PDFParser(parser="docling")  # Options: "docling", "pymupdf", "llama"
+parser = PDFParser(parser="docling")  # Options: "docling", "pymupdf", "llama", "anthropic", "openai"
+
 ```
 
 ### 2. Parse a PDF File
@@ -71,15 +72,36 @@ Choose from the following parsers based on your requirements:
 - **[Docling](https://github.com/DS4SD/docling)**: Advanced parser with multimodal capabilities.
 - **[PyMuPDF](https://github.com/pymupdf/PyMuPDF)**: Lightweight and efficient.
 - **[LlamaParse](https://github.com/run-llama/llama_parse)**: AI-enhanced parser with advanced capabilities.
+- **[Anthropic Claude](https://www.anthropic.com/claude)**: Advanced AI model using Claude 3.5 Sonnet with native PDF processing capabilities.
+- **[OpenAI GPT-4 Vision](https://openai.com/gpt-4)**: State-of-the-art vision model for document analysis.
 
 Each parser has its own strengths. Choose the one that best fits your use case.
 
-##### Llama Setup
+##### API Key Setup
 
-If you choose to use the LlamaPDFParser, you need to set up an API key. Follow these steps:
+If you choose to use the Llama, Anthropic, or OpenAI parsers, you need to set up API keys. Follow these steps:
 
 1. Create a `.env` File: In the root directory of your project, create a file named `.env`.
-2. Add Your API Key: Add the following line to the .env file, replacing your-api-key with your Llmap API key: `LLAMA_API_KEY=your-api-key`
+2. Add Your API Keys: Add the following lines to the .env file, replacing the placeholders with your actual API keys:
+   ```
+   LLAMA_API_KEY=your-llama-api-key
+   ANTHROPIC_API_KEY=your-anthropic-api-key
+   OPENAI_API_KEY=your-openai-api-key
+   ```
+
+##### Parser-Specific Requirements
+
+- **Llama Parser**: Requires a Llama API key
+- **Anthropic Parser**: 
+  - Requires an Anthropic API key
+  - Uses Claude 3.5 Sonnet with native PDF processing (no image conversion needed)
+  - Supports text and table extraction
+  - Note: Image extraction not currently supported due to API limitations
+- **OpenAI Parser**: 
+  - Requires an OpenAI API key
+  - Uses OpenAI's file search with vector embeddings for efficient PDF processing
+  - Automatically handles text extraction and table detection
+  - More efficient, cheaper, and faster than image-based approaches
 
 ## Contributing
 
