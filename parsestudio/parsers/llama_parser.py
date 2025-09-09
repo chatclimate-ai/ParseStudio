@@ -6,8 +6,10 @@ from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Meta
 import io
 from PIL import Image
 from dotenv import load_dotenv
+from ..logging_config import get_logger
 
 load_dotenv()
+logger = get_logger("parsers.llama")
 
 
 class LlamaPDFParser:
@@ -106,7 +108,7 @@ class LlamaPDFParser:
             ```python
             parser = LlamaPDFParser()
             data = parser.parse("path/to/file.pdf", modalities=["text", "tables", "images"])
-            print(len(data)) 
+            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "llama"}) 
             # Output: 1
             text = data[0].text # TextElement
             tables = data[0].tables # List of TableElement
@@ -231,9 +233,9 @@ class LlamaPDFParser:
                 try:
                     table_df = pd.read_csv(io.StringIO(item["csv"]), sep=",")
                 except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError) as e:
-                    print(f"Table parsing failed - malformed data: {e}")
+                    logger.warning("Table parsing failed - malformed data", extra={"error": str(e), "parser": "llama"})
                 except Exception as e:
-                    print(f"Unexpected error converting table to dataframe: {e}")
+                    logger.error("Unexpected error converting table to dataframe", extra={"error": str(e), "parser": "llama"})
                     table_df = None
                 
                 tables.append(
