@@ -1,27 +1,34 @@
-import pytest
-from unittest.mock import Mock, patch
 import os
+from unittest.mock import Mock, patch
+
 import pandas as pd
+import pytest
 from PIL import Image
-from parsestudio.parsers.llama_parser import LlamaPDFParser, ParserOutput, TableElement, ImageElement, Metadata, TextElement
+
+from parsestudio.parsers.llama_parser import (
+    ImageElement,
+    LlamaPDFParser,
+    Metadata,
+    ParserOutput,
+    TableElement,
+    TextElement,
+)
 
 
 class TestLlamaPDFParser:
     @pytest.fixture
     def parser(self):
         with patch.dict("os.environ", {"LLAMA_PARSE_KEY": "mock_api_key"}):
-            return LlamaPDFParser()
-        
-        assert parser.converter.api_key == "mock_api_key"
+            parser = LlamaPDFParser()
+            assert parser.converter.api_key == "mock_api_key"
+            return parser
 
     @patch.dict(os.environ, {"LLAMA_PARSE_KEY": "mock_api_key"})
     def test_init(self, parser):
         """
         Test the initialization of the LlamaPDFParser class.
         """
-        llama_options = {
-            "show_progress": False
-        }
+        llama_options = {"show_progress": False}
 
         with patch("parsestudio.parsers.llama_parser.LlamaParse") as mock_llama:
             mock_llama_instance = mock_llama.return_value
@@ -29,16 +36,10 @@ class TestLlamaPDFParser:
             mock_llama_instance.show_progress = llama_options["show_progress"]
 
             parser = LlamaPDFParser(llama_options)
-            mock_llama.assert_called_once_with(
-                api_key="mock_api_key",
-                **llama_options
-            )
-
-
+            mock_llama.assert_called_once_with(api_key="mock_api_key", **llama_options)
 
         assert parser.converter.api_key == "mock_api_key"
         assert parser.converter.show_progress == llama_options["show_progress"]
-
 
     def test_load_documents(self, parser):
         """
@@ -48,7 +49,6 @@ class TestLlamaPDFParser:
         parser.converter.get_json_result.return_value = [{"test": "data"}]
         result = list(parser.load_documents(["test.pdf"]))
         assert result == [{"test": "data"}]
-
 
     @patch.dict(os.environ, {"LLAMA_PARSE_KEY": "mock_api_key"})
     @patch.object(LlamaPDFParser, "load_documents")
@@ -67,24 +67,28 @@ class TestLlamaPDFParser:
                         {
                             "type": "table",
                             "md": "| Header |\n|--------|",
-                            "csv": "Header\nValue"
+                            "csv": "Header\nValue",
                         }
-                    ]
+                    ],
                 }
-            ]
+            ],
         }
         mock_load.return_value = [mock_document]
         mock_export.return_value = ParserOutput(
-            text= TextElement(text="Sample text"),
-            tables=[TableElement(
-                markdown="| Header |\n|--------|", 
-                dataframe=pd.DataFrame([[1, 2], [3, 4]]),
-                metadata=Metadata(page_number=1)
-            )],
-            images=[ImageElement(
-                image=Image.new("RGB", (60, 30), color="red"),
-                metadata=Metadata(page_number=1)
-            )]
+            text=TextElement(text="Sample text"),
+            tables=[
+                TableElement(
+                    markdown="| Header |\n|--------|",
+                    dataframe=pd.DataFrame([[1, 2], [3, 4]]),
+                    metadata=Metadata(page_number=1),
+                )
+            ],
+            images=[
+                ImageElement(
+                    image=Image.new("RGB", (60, 30), color="red"),
+                    metadata=Metadata(page_number=1),
+                )
+            ],
         )
 
         result = parser.parse("test.pdf", ["text", "tables", "images"])
@@ -100,15 +104,12 @@ class TestLlamaPDFParser:
         assert result[0].tables[0].markdown == "| Header |\n|--------|"
         assert result[0].tables[0].dataframe.shape == (2, 2)
         assert result[0].images[0].image.size == (60, 30)
-        
-
 
     def test_extract_text(self, parser):
         page = {"text": "Test text"}
         result = parser._extract_text(page)
         assert isinstance(result, TextElement)
         assert result.text == "Test text"
-
 
     def test_extract_tables(self, parser):
         page = {
@@ -119,10 +120,10 @@ class TestLlamaPDFParser:
                     "csv": "Header\nValue",
                 }
             ],
-            "page": 1
+            "page": 1,
         }
         result = parser._extract_tables(page)
-        
+
         assert isinstance(result, list)
         assert len(result) == 1
         assert isinstance(result[0], TableElement)

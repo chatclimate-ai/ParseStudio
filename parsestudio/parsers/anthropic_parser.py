@@ -1,17 +1,19 @@
-from anthropic import Anthropic
-from typing import Union, List, Generator, Dict, Optional
-import pandas as pd
-from PIL import Image
-from io import BytesIO, StringIO
-from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
-import json
-import os
 import base64
+import os
+from collections.abc import Generator
+from typing import Any
+
+import pandas as pd
+from anthropic import Anthropic
 from dotenv import load_dotenv
-from ..logging_config import get_logger
+
+from parsestudio.logging_config import get_logger
+
+from .schemas import ImageElement, Metadata, ParserOutput, TableElement, TextElement
 
 load_dotenv()
 logger = get_logger("parsers.anthropic")
+
 
 class AnthropicPDFParser:
     """
@@ -19,83 +21,91 @@ class AnthropicPDFParser:
 
     Args:
         anthropic_options (Optional[Dict]): Options for the Anthropic API client.
-    
+
     Raises:
         ValueError: An error occurred while initializing the Anthropic client.
     """
+
     def __init__(
-            self,
-            anthropic_options: Optional[Dict] = {
-                "max_tokens": 1024,
-                "model": "claude-3-5-sonnet-20241022",
-                "betas": ["pdfs-2024-09-25"]
-            }
-            ):
+        self,
+        anthropic_options: dict | None = None,
+    ):
         try:
             api_key = os.environ.get("ANTHROPIC_API_KEY")
             if not api_key:
                 raise ValueError("ANTHROPIC_API_KEY environment variable is required")
             self.client = Anthropic(api_key=api_key)
-            self.options = anthropic_options
+            self.options = anthropic_options or {
+                "max_tokens": 1024,
+                "model": "claude-3-5-sonnet-20241022",
+                "betas": ["pdfs-2024-09-25"],
+            }
         except ValueError as e:
             # Re-raise ValueError for missing API key or invalid configuration
             raise e
         except Exception as e:
-            raise ConnectionError(f"Failed to initialize Anthropic client: {e}")
+            raise ConnectionError(f"Failed to initialize Anthropic client: {e}") from e
 
-    def load_documents(self, paths: List[str]) -> Generator[Dict, None, None]:
+    def load_documents(self, paths: list[str]) -> Generator[dict, None, None]:
         """
         Load the documents from the given paths and yield the parsed result.
 
         Args:
             paths (List[str]): List of paths to the PDF files.
-        
+
         Returns:
             result (Generator[Dict, None, None]): Generator yielding parsed document data
         """
         for path in paths:
             try:
                 with open(path, "rb") as pdf_file:
-                    pdf_data = base64.standard_b64encode(pdf_file.read()).decode("utf-8")
+                    pdf_data = base64.standard_b64encode(pdf_file.read()).decode(
+                        "utf-8"
+                    )
 
                 response = self.client.beta.messages.create(
                     model=self.options.get("model", "claude-3-5-sonnet-20241022"),
                     betas=self.options.get("betas", ["pdfs-2024-09-25"]),
                     max_tokens=self.options.get("max_tokens", 1024),
-                    messages=[{
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "document",
-                                "source": {
-                                    "type": "base64",
-                                    "media_type": "application/pdf",
-                                    "data": pdf_data
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "text": "Extract and structure this PDF's content with: text_content and tables (as markdown with page numbers)"
-                            }
-                        ]
-                    }]
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "document",
+                                    "source": {
+                                        "type": "base64",
+                                        "media_type": "application/pdf",
+                                        "data": pdf_data,
+                                    },
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "Extract and structure this PDF's content with: text_content and tables (as markdown with page numbers)",
+                                },
+                            ],
+                        }
+                    ],
                 )
-                
+
                 try:
                     result = {
                         "text_content": response.content[0].text,
-                        "tables": []  # Tables will be extracted from the text content
+                        "tables": [],  # Tables will be extracted from the text content
                     }
-                except (IndexError, AttributeError, TypeError) as e:
+                except (IndexError, AttributeError, TypeError):
                     # Handle cases where response.content structure differs from expected format
                     result = {"text_content": str(response.content), "tables": []}
-                
+
                 yield result
             except Exception as e:
-                logger.error(f"Error processing file {path}", extra={"file_path": path, "error": str(e)})
+                logger.error(
+                    f"Error processing file {path}",
+                    extra={"file_path": path, "error": str(e)},
+                )
                 yield {"text_content": "", "tables": []}
 
-    def _validate_modalities(self, modalities: List[str]) -> None:
+    def _validate_modalities(self, modalities: list[str]) -> None:
         """
         Validate the modalities provided by the user.
 
@@ -108,14 +118,16 @@ class AnthropicPDFParser:
         valid_modalities = ["text", "tables", "images"]
         for modality in modalities:
             if modality not in valid_modalities:
-                raise ValueError(f"Invalid modality: {modality}. Valid options: {valid_modalities}")
+                raise ValueError(
+                    f"Invalid modality: {modality}. Valid options: {valid_modalities}"
+                )
 
     def parse(
-            self,
-            paths: Union[str, List[str]],
-            modalities: List[str] = ["text", "tables", "images"],
-            **kwargs
-        ) -> List[ParserOutput]:
+        self,
+        paths: str | list[str],
+        modalities: list[str] | None = None,
+        **kwargs: Any,
+    ) -> list[ParserOutput]:
         """
         Parse PDF files and extract specified modalities.
 
@@ -123,10 +135,10 @@ class AnthropicPDFParser:
             paths: Path or list of paths to PDF files
             modalities: List of modalities to extract. Default: ["text", "tables", "images"]
             **kwargs: Additional keyword arguments for parsing
-        
+
         Returns:
             List[ParserOutput]: Parsed outputs
-        
+
         Example:
         !!! example
             ```python
@@ -138,7 +150,10 @@ class AnthropicPDFParser:
                 logger.debug(f"Table page: {table.metadata.page_number}")
             ```
         """
+        if modalities is None:
+            modalities = ["text", "tables", "images"]
         self._validate_modalities(modalities)
+        # kwargs reserved for future use
         if isinstance(paths, str):
             paths = [paths]
         data = []
@@ -147,24 +162,28 @@ class AnthropicPDFParser:
             data.append(output)
         return data
 
-    def __export_result(self, parsed_data: Dict, modalities: List[str]) -> ParserOutput:
+    def __export_result(self, parsed_data: dict, modalities: list[str]) -> ParserOutput:
         """
         Export parsed data to ParserOutput format.
 
         Args:
             parsed_data: Dictionary containing parsed content
             modalities: List of modalities to extract
-        
+
         Returns:
             ParserOutput: Structured output with requested modalities
         """
-        text = TextElement(text=parsed_data.get("text_content", "")) if "text" in modalities else TextElement(text="")
+        text = (
+            TextElement(text=parsed_data.get("text_content", ""))
+            if "text" in modalities
+            else TextElement(text="")
+        )
         tables = self._extract_tables(parsed_data) if "tables" in modalities else []
-        images = []  # Images not supported in current API version
+        images: list[ImageElement] = []  # Images not supported in current API version
         return ParserOutput(text=text, tables=tables, images=images)
 
     @staticmethod
-    def _extract_tables(parsed_data: Dict) -> List[TableElement]:
+    def _extract_tables(parsed_data: dict) -> list[TableElement]:
         """
         Extract tables from parsed data.
 
@@ -178,11 +197,13 @@ class AnthropicPDFParser:
         for table in parsed_data.get("tables", []):
             try:
                 markdown = table["markdown"]
-                lines = markdown.split('\n')
-                headers = [x.strip() for x in lines[0].split('|') if x]
+                lines = markdown.split("\n")
+                headers = [x.strip() for x in lines[0].split("|") if x]
                 rows = []
                 for line in lines[2:]:  # Skip header and separator lines
-                    row = [x.strip() for x in line.split('|')[1:-1]]  # Skip first and last empty cells
+                    row = [
+                        x.strip() for x in line.split("|")[1:-1]
+                    ]  # Skip first and last empty cells
                     if row:
                         rows.append(row)
                 table_df = pd.DataFrame(rows, columns=headers)
@@ -192,14 +213,25 @@ class AnthropicPDFParser:
                         dataframe=table_df,
                         metadata=Metadata(
                             page_number=table.get("page_number", 1),
-                            bbox=table.get("bbox", [0, 0, 0, 0])
-                        )
+                            bbox=table.get("bbox", [0, 0, 0, 0]),
+                        ),
                     )
                 )
-            except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError, KeyError) as e:
-                logger.warning(f"Table parsing failed - malformed data", extra={"error": str(e), "parser": "anthropic"})
+            except (
+                pd.errors.EmptyDataError,
+                pd.errors.ParserError,
+                ValueError,
+                KeyError,
+            ) as e:
+                logger.warning(
+                    "Table parsing failed - malformed data",
+                    extra={"error": str(e), "parser": "anthropic"},
+                )
                 continue
             except Exception as e:
-                logger.error(f"Unexpected error processing table", extra={"error": str(e), "parser": "anthropic"})
+                logger.error(
+                    "Unexpected error processing table",
+                    extra={"error": str(e), "parser": "anthropic"},
+                )
                 continue
         return tables

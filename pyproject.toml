@@ -136,6 +136,7 @@ ignore = [
     "C901",  # Too complex (we'll handle this gradually)
     "S101",  # Use of assert (common in tests)
     "ARG001", # Unused function argument (common in parsers)
+    "TID252", # Prefer absolute imports over relative imports from parent modules
 ]
 
 [tool.ruff.lint.mccabe]

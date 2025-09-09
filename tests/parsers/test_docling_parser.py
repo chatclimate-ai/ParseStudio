@@ -1,13 +1,22 @@
-import pytest
-from unittest.mock import Mock, patch
-from parsestudio.parsers.docling_parser import DoclingPDFParser, ParserOutput, TableElement, TextElement, ImageElement, Metadata
-from docling.datamodel.document import ConversionResult, DoclingDocument
-from docling.datamodel.base_models import ConversionStatus, InputFormat
-from docling.datamodel.pipeline_options import PdfPipelineOptions
-from docling_core.types.doc import TableItem, PictureItem
-from PIL import Image
-import pandas as pd
 import sys
+from unittest.mock import Mock, patch
+
+import pandas as pd
+import pytest
+from docling.datamodel.base_models import ConversionStatus, InputFormat
+from docling.datamodel.document import ConversionResult, DoclingDocument
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling_core.types.doc import PictureItem, TableItem
+from PIL import Image
+
+from parsestudio.parsers.docling_parser import (
+    DoclingPDFParser,
+    ImageElement,
+    Metadata,
+    ParserOutput,
+    TableElement,
+    TextElement,
+)
 
 
 class TestDoclingPDFParser:
@@ -18,10 +27,15 @@ class TestDoclingPDFParser:
     def test_init(self, parser):
         pipeline_options = PdfPipelineOptions(do_ocr=False)
         parser = DoclingPDFParser(pipeline_options=pipeline_options)
-        assert parser.converter.format_to_options[InputFormat.PDF].pipeline_options == pipeline_options
-        assert parser.converter.format_to_options[InputFormat.PDF].pipeline_options.do_ocr is False
+        assert (
+            parser.converter.format_to_options[InputFormat.PDF].pipeline_options
+            == pipeline_options
+        )
+        assert (
+            parser.converter.format_to_options[InputFormat.PDF].pipeline_options.do_ocr
+            is False
+        )
 
-    
     def test_load_documents(self, parser):
         parser.converter = Mock()
         parser.converter.convert_all.return_value = [Mock(spec=ConversionResult)]
@@ -36,30 +50,31 @@ class TestDoclingPDFParser:
             pytest.fail("Valid modalities raised ValueError unexpectedly")
 
         # Test with an invalid modality
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid modality"):
             parser._validate_modalities(["text", "invalid_modality"])
 
-  
     @patch("parsestudio.parsers.docling_parser.DoclingPDFParser.load_documents")
     def test_parse(self, mock_load_documents, parser):
         mock_result = Mock(spec=ConversionResult)
         mock_result.status = ConversionStatus.SUCCESS
         mock_result.document = Mock(spec=DoclingDocument)
 
-       
         mock_load_documents.return_value = [mock_result]
 
         mock_parser_output = ParserOutput(
-            text= TextElement(text="Sample text"),
-            tables=[TableElement(
-                markdown="| Header |\n|--------|", 
-                dataframe=pd.DataFrame(),
-                metadata= Metadata()
-                )],
-            images=[ImageElement(
-                image=Image.new("RGB", (60, 30), color="red"),
-                metadata= Metadata()
-                )]
+            text=TextElement(text="Sample text"),
+            tables=[
+                TableElement(
+                    markdown="| Header |\n|--------|",
+                    dataframe=pd.DataFrame(),
+                    metadata=Metadata(),
+                )
+            ],
+            images=[
+                ImageElement(
+                    image=Image.new("RGB", (60, 30), color="red"), metadata=Metadata()
+                )
+            ],
         )
 
         # Mock __export_result to return the mock ParserOutput object
@@ -69,10 +84,7 @@ class TestDoclingPDFParser:
             result = parser.parse("test.pdf")
 
         mock_load_documents.assert_called_once_with(
-            ["test.pdf"],
-            True,
-            sys.maxsize,
-            sys.maxsize
+            ["test.pdf"], True, sys.maxsize, sys.maxsize
         )
 
         assert isinstance(result, list)
@@ -82,9 +94,10 @@ class TestDoclingPDFParser:
     def test_extract_tables(self):
         mock_table_item = Mock(spec=TableItem)
         mock_table_item.export_to_markdown.return_value = "| Header |\n|--------|"
-        mock_table_item.export_to_dataframe.return_value = pd.DataFrame([[1, 2], [3, 4]])
+        mock_table_item.export_to_dataframe.return_value = pd.DataFrame(
+            [[1, 2], [3, 4]]
+        )
         mock_table_item.prov = [Mock(page_no=1, bbox=Mock(l=0, t=0, r=1, b=1))]
-
 
         result = DoclingPDFParser._extract_tables(mock_table_item)
 
@@ -103,7 +116,9 @@ class TestDoclingPDFParser:
         mock_picture_item.get_image.return_value = mock_image
         mock_picture_item.prov = [Mock(page_no=1, bbox=Mock(l=0, t=0, r=1, b=1))]
 
-        result = DoclingPDFParser._extract_images(mock_picture_item, Mock(spec=DoclingDocument))
+        result = DoclingPDFParser._extract_images(
+            mock_picture_item, Mock(spec=DoclingDocument)
+        )
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -117,16 +132,17 @@ class TestDoclingPDFParser:
     def test_extract_images_no_image(self, parser):
         # Create a mock PictureItem
         mock_picture_item = Mock(spec=PictureItem)
-        
+
         # Define mock return value for get_image as None
         mock_picture_item.get_image.return_value = None
-        
+
         # Call the method to test
-        result = DoclingPDFParser._extract_images(mock_picture_item, Mock(spec=DoclingDocument))
+        result = DoclingPDFParser._extract_images(
+            mock_picture_item, Mock(spec=DoclingDocument)
+        )
 
         # Assert the result is an empty list
         assert result == []
-
 
     def test_extract_text(self, parser):
         mock_document = Mock(spec=DoclingDocument)
@@ -148,4 +164,3 @@ class TestDoclingPDFParser:
 
         assert isinstance(result, TextElement)
         assert result.text == "Sample text"
-    

@@ -1,10 +1,13 @@
-import fitz  # PyMuPDF
-from PIL import Image
-from typing import Union, List, Generator, Dict
+from collections.abc import Generator
 from io import BytesIO
-from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
+
+import fitz  # PyMuPDF
 from fitz import Page
-from ..logging_config import get_logger
+from PIL import Image
+
+from parsestudio.logging_config import get_logger
+
+from .schemas import ImageElement, Metadata, ParserOutput, TableElement, TextElement
 
 logger = get_logger("parsers.pymupdf")
 
@@ -18,13 +21,13 @@ class PyMuPDFParser:
         pass
 
     @staticmethod
-    def load_documents(paths: List[str]) -> Generator[List[Page], None, None]:
+    def load_documents(paths: list[str]) -> Generator[list[Page], None, None]:
         """
         Load the documents from the given paths.
 
         Args:
             paths (List[str]): List of paths to the PDF files.
-        
+
         Returns:
             result (Generator[List[Page], None, None]): A generator that yields a list of pages for each document
         """
@@ -33,7 +36,7 @@ class PyMuPDFParser:
                 pages = [doc.load_page(page_num) for page_num in range(doc.page_count)]
                 yield pages
 
-    def _validate_modalities(self, modalities: List[str]) -> None:
+    def _validate_modalities(self, modalities: list[str]) -> None:
         """
         Validate the modalities provided by the user. The valid modalities are: ["text", "tables", "images"]
 
@@ -52,28 +55,28 @@ class PyMuPDFParser:
 
     def parse(
         self,
-        paths: Union[str, List[str]],
-        modalities: List[str] = ["text", "tables", "images"],
-    ) -> List[ParserOutput]:
+        paths: str | list[str],
+        modalities: list[str] | None = None,
+    ) -> list[ParserOutput]:
         """
         Parse the PDF file and return the extracted the specified modalities.
 
         Args:
             paths (Union[str, List[str]]): A path or a list of paths to the PDF files.
             modalities (List[str], optional): List of modalities to extract. Defaults to ["text", "tables", "images"].
-        
+
         Returns:
             data (List[ParserOutput]): A list of ParserOutput objects containing the extracted modalities.
-        
+
         Raises:
             ValueError: If the modality is not valid
-        
+
         Example:
         !!! example
             ```python
             parser = PyMuPDFParser()
             data = parser.parse("path/to/file.pdf", modalities=["text", "tables", "images"])
-            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "pymupdf"}) 
+            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "pymupdf"})
             # Output: 1
             text = data[0].text # TextElement
             tables = data[0].tables # List of TableElement
@@ -99,9 +102,11 @@ class PyMuPDFParser:
             image_obj = image.image # PIL Image object
             # Access the metadata of the image
             page_number = image.metadata.page_number
-            bbox = image.metadata.bbox 
+            bbox = image.metadata.bbox
             ```
         """
+        if modalities is None:
+            modalities = ["text", "tables", "images"]
         self._validate_modalities(modalities)
 
         if isinstance(paths, str):
@@ -115,20 +120,20 @@ class PyMuPDFParser:
 
         return data
 
-    def __export_result(self, pages: List[Page], modalities: List[str]) -> ParserOutput:
+    def __export_result(self, pages: list[Page], modalities: list[str]) -> ParserOutput:
         """
         Export the result of the parsing process.
 
         Args:
             pages (List[Page]): List of pages
             modalities (List[str]): List of modalities to extract
-        
+
         Returns:
             output (ParserOutput): The ParserOutput object containing the extracted modalities.
         """
         text = TextElement(text="")
-        tables: List[TableElement] = []
-        images: List[ImageElement] = []
+        tables: list[TableElement] = []
+        images: list[ImageElement] = []
 
         for page in pages:
             if "text" in modalities:
@@ -152,7 +157,7 @@ class PyMuPDFParser:
 
         Returns:
             text (TextElement): The extracted text element
-        
+
         Example:
         !!! example
             ```python
@@ -161,14 +166,14 @@ class PyMuPDFParser:
                 page = doc.load_page(0)
                 text = parser._extract_text(page)
                 logger.debug(f"Extracted text: {text.text[:100]}...", extra={"parser": "pymupdf"})
-            
+
             # Output: 'Hello, World!'
             ```
         """
         return TextElement(text=page.get_text("text"))
 
     @staticmethod
-    def _extract_images(page: Page) -> List[ImageElement]:
+    def _extract_images(page: Page) -> list[ImageElement]:
         """
         Extract the images from the page.
 
@@ -191,17 +196,21 @@ class PyMuPDFParser:
                 bbox = image.metadata.bbox
             ```
         """
-        images: List[ImageElement] = []
+        images: list[ImageElement] = []
         for img in page.get_images(full=True):
             xref = img[0]
             base_image = page.parent.extract_image(xref)
             img_data = BytesIO(base_image["image"])
             image = Image.open(img_data).convert("RGB")
-            images.append(ImageElement(image=image, metadata=Metadata(page_number=page.number + 1)))
+            images.append(
+                ImageElement(
+                    image=image, metadata=Metadata(page_number=page.number + 1)
+                )
+            )
         return images
 
     @staticmethod
-    def _extract_tables(page: Page) -> List[TableElement]:
+    def _extract_tables(page: Page) -> list[TableElement]:
         """
         Extract the tables from the page.
 
@@ -227,7 +236,7 @@ class PyMuPDFParser:
         """
         tabs = page.find_tables()
 
-        tables: List[TableElement] = []
+        tables: list[TableElement] = []
         for tab in tabs:
             tables.append(
                 TableElement(
@@ -238,4 +247,3 @@ class PyMuPDFParser:
             )
 
         return tables
-
