@@ -59,7 +59,7 @@ SYSTEM_PROMPT = (
 class OpenAIFileSearchPDFParser:
     def __init__(self, openai_options: dict[str, Any] | None = None):
         # Sensible defaults for file search approach
-        defaults = {"model": "gpt-4o-mini", "max_tokens": 4000, "temperature": 0}
+        defaults = {"model": "gpt-4o-mini", "max_tokens": 8000, "temperature": 0}
         self.options = {**defaults, **(openai_options or {})}
         try:
             api_key = os.environ.get("OPENAI_API_KEY")
@@ -115,32 +115,61 @@ class OpenAIFileSearchPDFParser:
             raise RuntimeError(f"Failed to create vector store: {e}") from e
 
     def _analyze_with_file_search(self, vector_store_id: str, retries: int = 3) -> dict:
-        """Analyze PDF content using file search."""
+        """Analyze PDF content using file search via assistants API."""
         last_err = None
         for attempt in range(retries):
             try:
-                response = self.client.chat.completions.create(
+                # Create assistant with file search capability
+                assistant = self.client.beta.assistants.create(
+                    name="PDF Analyzer",
+                    instructions=SYSTEM_PROMPT,
                     model=self.options["model"],
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {
-                            "role": "user",
-                            "content": "Analyze the uploaded PDF file and extract all text content and tables according to the schema.",
-                        },
-                    ],
-                    tools=[
-                        {
-                            "type": "file_search",
-                            "file_search": {"vector_store_ids": [vector_store_id]},
+                    tools=[{"type": "file_search"}],
+                    tool_resources={
+                        "file_search": {
+                            "vector_store_ids": [vector_store_id]
                         }
-                    ],
-                    response_format={"type": "json_schema", "json_schema": JSON_SCHEMA},
-                    max_tokens=self.options["max_tokens"],
-                    temperature=self.options.get("temperature", 0),
+                    }
                 )
 
-                content = response.choices[0].message.content
-                return cast("dict[str, Any]", json.loads(content))
+                # Create thread
+                thread = self.client.beta.threads.create()
+
+                # Add message to thread
+                self.client.beta.threads.messages.create(
+                    thread_id=thread.id,
+                    role="user",
+                    content="Please extract all text content and tables from the PDF file. Return the response as JSON with 'text_content' (string) and 'tables' (array of objects with 'markdown' field). Include all text content comprehensively."
+                )
+
+                # Run the assistant
+                run = self.client.beta.threads.runs.create(
+                    thread_id=thread.id,
+                    assistant_id=assistant.id
+                )
+
+                # Wait for completion
+                while run.status in ["queued", "in_progress", "cancelling"]:
+                    time.sleep(1)
+                    run = self.client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+
+                if run.status == "completed":
+                    # Get messages
+                    messages = self.client.beta.threads.messages.list(thread_id=thread.id)
+                    response_content = messages.data[0].content[0].text.value
+
+                    # Try to parse as JSON, fallback to text extraction
+                    try:
+                        return cast("dict[str, Any]", json.loads(response_content))
+                    except json.JSONDecodeError:
+                        # Extract text content from response
+                        return {
+                            "text_content": response_content,
+                            "tables": []
+                        }
+
+                # Clean up
+                self.client.beta.assistants.delete(assistant.id)
             except openai.AuthenticationError as e:
                 raise ValueError(f"Invalid OpenAI API key: {e}") from e
             except openai.RateLimitError as e:
@@ -272,7 +301,7 @@ class OpenAIFileSearchPDFParser:
                         dataframe=df,
                         metadata=Metadata(
                             page_number=tbl.get("page_number", 1),
-                            bbox=tbl.get("bbox", [0, 0, 0, 0]),
+                            bbox=tbl.get("bbox") or [0, 0, 0, 0],
                         ),
                     )
                 )
