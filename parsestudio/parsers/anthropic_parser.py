@@ -32,7 +32,7 @@ class AnthropicPDFParser:
         try:
             self.client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
             self.options = anthropic_options
-        except Exception as e:
+        except (ValueError, OSError, ImportError) as e:
             raise ValueError(f"An error occurred while initializing the Anthropic client: {e}")
 
     def load_documents(self, paths: List[str]) -> Generator[Dict, None, None]:
@@ -78,12 +78,15 @@ class AnthropicPDFParser:
                         "text_content": response.content[0].text,
                         "tables": []  # Tables will be extracted from the text content
                     }
-                except:
+                except (IndexError, AttributeError) as e:
                     result = {"text_content": str(response.content), "tables": []}
                 
                 yield result
-            except Exception as e:
+            except (FileNotFoundError, PermissionError, OSError) as e:
                 print(f"Error processing file {path}: {str(e)}")
+                yield {"text_content": "", "tables": []}
+            except Exception as e:
+                print(f"Unexpected error processing file {path}: {str(e)}")
                 yield {"text_content": "", "tables": []}
 
     def _validate_modalities(self, modalities: List[str]) -> None:
@@ -187,7 +190,7 @@ class AnthropicPDFParser:
                         )
                     )
                 )
-            except Exception as e:
+            except (KeyError, ValueError, IndexError) as e:
                 print(f"Error processing table: {e}")
                 continue
         return tables

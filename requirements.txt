@@ -4,5 +4,5 @@ llama-parse>=0.5.14,<0.6.0
 pytest>=8.3.3,<9.0.0
 python-dotenv>=1.0.1,<2.0.0
 anthropic
-openai
+openai>=1.100.0
 PyCryptodome
