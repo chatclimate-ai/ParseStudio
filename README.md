@@ -92,12 +92,12 @@ If you choose to use the Llama, Anthropic, or OpenAI parsers, you need to set up
 ##### Parser-Specific Requirements
 
 - **Llama Parser**: Requires a Llama API key
-- **Anthropic Parser**: 
+- **Anthropic Parser**:
   - Requires an Anthropic API key
   - Uses Claude 3.5 Sonnet with native PDF processing (no image conversion needed)
   - Supports text and table extraction
   - Note: Image extraction not currently supported due to API limitations
-- **OpenAI Parser**: 
+- **OpenAI Parser**:
   - Requires an OpenAI API key
   - Uses OpenAI's file search with vector embeddings for efficient PDF processing
   - Automatically handles text extraction and table detection
@@ -105,14 +105,40 @@ If you choose to use the Llama, Anthropic, or OpenAI parsers, you need to set up
 
 ## Contributing
 
-We welcome contributions from the community! To contribute to Parsestudio, please follow these steps:
+We welcome contributions from the community! ParseStudio uses modern development tools to ensure code quality.
 
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Make your changes and commit them.
-4. Push your changes to your fork.
-5. Open a pull request.
-6. Our team will review your changes and merge them if they meet our guidelines.
+### Quick Development Setup
 
-Congratulations! You've contributed to Parsestudio.
+```bash
+# Install uv package manager
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# Clone and setup
+git clone https://github.com/chatclimate-ai/ParseStudio.git
+cd ParseStudio
+uv sync --dev
+
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Verify setup
+make all-checks
+```
+
+### Development Commands
+
+```bash
+make format     # Format code with Black & isort
+make lint       # Run ruff linter
+make type-check # Run mypy type checker  
+make test       # Run tests
+make all-checks # Run all quality checks
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
+
+### Code Quality
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
