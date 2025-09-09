@@ -139,7 +139,11 @@ class OpenAIFileSearchPDFParser:
                 self.client.beta.threads.messages.create(
                     thread_id=thread.id,
                     role="user",
-                    content="Please extract all text content and tables from the PDF file. Return the response as JSON with 'text_content' (string) and 'tables' (array of objects with 'markdown' field). Include all text content comprehensively."
+                    content=(
+                        "Please extract all text content and tables from the PDF file. "
+                        "Return the response as JSON with 'text_content' (string) and 'tables' "
+                        "(array of objects with 'markdown' field). Include all text content comprehensively."
+                    ),
                 )
 
                 # Run the assistant
@@ -151,7 +155,9 @@ class OpenAIFileSearchPDFParser:
                 # Wait for completion
                 while run.status in ["queued", "in_progress", "cancelling"]:
                     time.sleep(1)
-                    run = self.client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+                    run = self.client.beta.threads.runs.retrieve(
+                        thread_id=thread.id, run_id=run.id
+                    )
 
                 if run.status == "completed":
                     # Get messages
@@ -163,10 +169,7 @@ class OpenAIFileSearchPDFParser:
                         return cast("dict[str, Any]", json.loads(response_content))
                     except json.JSONDecodeError:
                         # Extract text content from response
-                        return {
-                            "text_content": response_content,
-                            "tables": []
-                        }
+                        return {"text_content": response_content, "tables": []}
 
                 # Clean up
                 self.client.beta.assistants.delete(assistant.id)
