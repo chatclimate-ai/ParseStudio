@@ -35,12 +35,6 @@ jobs:
         globs: |
           **/*.md
           !node_modules/**/*.md
-        config: |
-          {
-            "MD013": { "line_length": 120 },
-            "MD033": false,
-            "MD041": false
-          }
 
     - name: Check links in markdown
       uses: gaurav-nelson/github-action-markdown-link-check@v1
