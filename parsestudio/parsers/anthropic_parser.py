@@ -30,10 +30,16 @@ class AnthropicPDFParser:
             }
             ):
         try:
-            self.client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
+            if not api_key:
+                raise ValueError("ANTHROPIC_API_KEY environment variable is required")
+            self.client = Anthropic(api_key=api_key)
             self.options = anthropic_options
+        except ValueError as e:
+            # Re-raise ValueError for missing API key or invalid configuration
+            raise e
         except Exception as e:
-            raise ValueError(f"An error occurred while initializing the Anthropic client: {e}")
+            raise ConnectionError(f"Failed to initialize Anthropic client: {e}")
 
     def load_documents(self, paths: List[str]) -> Generator[Dict, None, None]:
         """
@@ -78,7 +84,8 @@ class AnthropicPDFParser:
                         "text_content": response.content[0].text,
                         "tables": []  # Tables will be extracted from the text content
                     }
-                except:
+                except (IndexError, AttributeError, TypeError) as e:
+                    # Handle cases where response.content structure differs from expected format
                     result = {"text_content": str(response.content), "tables": []}
                 
                 yield result
@@ -187,7 +194,10 @@ class AnthropicPDFParser:
                         )
                     )
                 )
+            except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError, KeyError) as e:
+                print(f"Table parsing failed - malformed data: {e}")
+                continue
             except Exception as e:
-                print(f"Error processing table: {e}")
+                print(f"Unexpected error processing table: {e}")
                 continue
         return tables

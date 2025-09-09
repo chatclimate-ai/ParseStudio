@@ -1,4 +1,5 @@
 from openai import OpenAI
+import openai
 from typing import Union, List, Generator, Dict, Optional, Any
 import pandas as pd
 import json
@@ -62,9 +63,15 @@ class OpenAIFileSearchPDFParser:
         }
         self.options = {**defaults, **(openai_options or {})}
         try:
-            self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+            api_key = os.environ.get("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY environment variable is required")
+            self.client = OpenAI(api_key=api_key)
+        except ValueError as e:
+            # Re-raise ValueError for missing API key or invalid configuration
+            raise e
         except Exception as e:
-            raise ValueError(f"Failed to init OpenAI client: {e}")
+            raise ConnectionError(f"Failed to initialize OpenAI client: {e}")
 
     def _upload_file_to_openai(self, file_path: str) -> str:
         """Upload PDF file to OpenAI and return file ID."""
@@ -75,8 +82,16 @@ class OpenAIFileSearchPDFParser:
                     purpose="assistants"
                 )
             return response.id
+        except (FileNotFoundError, PermissionError, IOError) as e:
+            raise ValueError(f"File access error for {file_path}: {e}")
+        except openai.AuthenticationError as e:
+            raise ValueError(f"Invalid OpenAI API key: {e}")
+        except openai.RateLimitError as e:
+            raise RuntimeError(f"OpenAI API rate limit exceeded: {e}")
+        except openai.APIError as e:
+            raise RuntimeError(f"OpenAI API error during file upload: {e}")
         except Exception as e:
-            raise ValueError(f"Failed to upload file {file_path}: {e}")
+            raise RuntimeError(f"Unexpected error uploading file {file_path}: {e}")
 
     def _create_vector_store(self, file_ids: List[str]) -> str:
         """Create vector store with uploaded files."""
@@ -93,8 +108,14 @@ class OpenAIFileSearchPDFParser:
                 )
             
             return vector_store.id
+        except openai.AuthenticationError as e:
+            raise ValueError(f"Invalid OpenAI API key: {e}")
+        except openai.RateLimitError as e:
+            raise RuntimeError(f"OpenAI API rate limit exceeded: {e}")
+        except openai.APIError as e:
+            raise RuntimeError(f"OpenAI API error creating vector store: {e}")
         except Exception as e:
-            raise ValueError(f"Failed to create vector store: {e}")
+            raise RuntimeError(f"Failed to create vector store: {e}")
 
     def _analyze_with_file_search(self, vector_store_id: str, retries: int = 3) -> Dict:
         """Analyze PDF content using file search."""
@@ -123,6 +144,14 @@ class OpenAIFileSearchPDFParser:
 
                 content = response.choices[0].message.content
                 return json.loads(content)
+            except openai.AuthenticationError as e:
+                raise ValueError(f"Invalid OpenAI API key: {e}")
+            except openai.RateLimitError as e:
+                last_err = e
+                time.sleep((attempt + 1) * 2.0)  # Longer wait for rate limits
+            except (openai.APIError, json.JSONDecodeError, KeyError) as e:
+                last_err = e
+                time.sleep((attempt + 1) * 1.5)
             except Exception as e:
                 last_err = e
                 time.sleep((attempt + 1) * 1.5)
@@ -230,6 +259,8 @@ class OpenAIFileSearchPDFParser:
                         )
                     )
                 )
+            except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError) as e:
+                print(f"[WARN] Table parsing failed - malformed data: {e}")
             except Exception as e:
-                print(f"[WARN] Table parse failed: {e}")
+                print(f"[ERROR] Unexpected table parsing error: {e}")
         return out
