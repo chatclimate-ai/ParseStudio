@@ -126,10 +126,8 @@ class OpenAIFileSearchPDFParser:
                     model=self.options["model"],
                     tools=[{"type": "file_search"}],
                     tool_resources={
-                        "file_search": {
-                            "vector_store_ids": [vector_store_id]
-                        }
-                    }
+                        "file_search": {"vector_store_ids": [vector_store_id]}
+                    },
                 )
 
                 # Create thread
@@ -148,8 +146,7 @@ class OpenAIFileSearchPDFParser:
 
                 # Run the assistant
                 run = self.client.beta.threads.runs.create(
-                    thread_id=thread.id,
-                    assistant_id=assistant.id
+                    thread_id=thread.id, assistant_id=assistant.id
                 )
 
                 # Wait for completion
@@ -161,7 +158,9 @@ class OpenAIFileSearchPDFParser:
 
                 if run.status == "completed":
                     # Get messages
-                    messages = self.client.beta.threads.messages.list(thread_id=thread.id)
+                    messages = self.client.beta.threads.messages.list(
+                        thread_id=thread.id
+                    )
                     response_content = messages.data[0].content[0].text.value
 
                     # Try to parse as JSON, fallback to text extraction
