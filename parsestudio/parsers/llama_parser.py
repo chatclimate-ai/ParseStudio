@@ -39,15 +39,18 @@ class LlamaPDFParser:
             ):
         
         try:
+            api_key = os.environ.get("LLAMA_PARSE_KEY")
+            if not api_key:
+                raise ValueError("LLAMA_PARSE_KEY environment variable is required")
             self.converter = LlamaParse(
-                api_key=os.environ.get("LLAMA_PARSE_KEY"),
+                api_key=api_key,
                 **llama_options
             )
-
+        except ValueError as e:
+            # Re-raise ValueError for missing API key or invalid configuration
+            raise e
         except Exception as e:
-            raise ValueError(
-                f"An error occurred while initializing the LlamaParse converter: {e}"
-            )
+            raise ConnectionError(f"Failed to initialize LlamaParse converter: {e}")
 
     def load_documents(self, paths: List[str]) -> Generator[Dict, None, None]:
         """
@@ -227,8 +230,10 @@ class LlamaPDFParser:
                 table_md = item["md"]
                 try:
                     table_df = pd.read_csv(io.StringIO(item["csv"]), sep=",")
+                except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError) as e:
+                    print(f"Table parsing failed - malformed data: {e}")
                 except Exception as e:
-                    print(f"Error converting table {table_md} to dataframe: {e}")
+                    print(f"Unexpected error converting table to dataframe: {e}")
                     table_df = None
                 
                 tables.append(
