@@ -1,0 +1,41 @@
+{
+  "fallbackHttpStatus": [
+    200,
+    202
+  ],
+  "httpHeaders": [
+    {
+      "headers": {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      },
+      "urls": [
+        "https://github.com",
+        "https://api.github.com"
+      ]
+    }
+  ],
+  "ignorePatterns": [
+    {
+      "pattern": "^https://img.shields.io/"
+    },
+    {
+      "pattern": "^https://static.pepy.tech/"
+    },
+    {
+      "pattern": "^https://github.com/chatclimate-ai/ParseStudio/stargazers"
+    },
+    {
+      "pattern": "^https://github.com/chatclimate-ai/ParseStudio/issues"
+    },
+    {
+      "pattern": "^https://github.com/chatclimate-ai/ParseStudio/network"
+    },
+    {
+      "pattern": "^https://github.com/chatclimate-ai/ParseStudio/discussions"
+    }
+  ],
+  "retryCount": 2,
+  "retryOn429": true,
+  "timeout": "20s"
+}

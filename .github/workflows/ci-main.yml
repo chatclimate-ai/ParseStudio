@@ -1,6 +1,24 @@
-name: CI
+name: CI - Main
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'parsestudio/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - '.github/workflows/**'
+      - 'Makefile'
+      - '.pre-commit-config.yaml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'parsestudio/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - '.github/workflows/**'
+      - 'Makefile'
+      - '.pre-commit-config.yaml'
 
 jobs:
   # Code quality checks
