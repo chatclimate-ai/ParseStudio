@@ -1,10 +1,18 @@
-import pytest
-from unittest.mock import Mock, patch, MagicMock, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import fitz
-from PIL import Image
 import pandas as pd
-from io import BytesIO
-from parsestudio.parsers.pymupdf_parser import PyMuPDFParser, ParserOutput, TableElement, TextElement, ImageElement, Metadata
+import pytest
+from PIL import Image
+
+from parsestudio.parsers.pymupdf_parser import (
+    ImageElement,
+    Metadata,
+    ParserOutput,
+    PyMuPDFParser,
+    TableElement,
+    TextElement,
+)
 
 
 @pytest.fixture
@@ -57,9 +65,7 @@ class TestPyMuPDFParser:
             with patch.object(
                 PyMuPDFParser, "_PyMuPDFParser__export_result"
             ) as mock_export:
-                mock_export.return_value = ParserOutput(
-                    text= TextElement(text="test")  
-                )
+                mock_export.return_value = ParserOutput(text=TextElement(text="test"))
                 result = parser.parse("test.pdf")
                 assert isinstance(result, list)
                 assert len(result) == 1
@@ -74,43 +80,42 @@ class TestPyMuPDFParser:
             with patch.object(
                 PyMuPDFParser, "_PyMuPDFParser__export_result"
             ) as mock_export:
-                mock_export.return_value = ParserOutput(
-                    text= TextElement(text="test") 
-                )
+                mock_export.return_value = ParserOutput(text=TextElement(text="test"))
                 result = parser.parse(["test1.pdf", "test2.pdf"])
                 assert isinstance(result, list)
                 assert len(result) == 2
                 assert all(isinstance(r, ParserOutput) for r in result)
 
-
-
     def test_export_result(self, parser, mock_page):
         """
         Test that the parser exports the result correctly.
         """
-        with patch.object(PyMuPDFParser, "_extract_text") as mock_text:
-            with patch.object(PyMuPDFParser, "_extract_tables") as mock_tables:
-                with patch.object(PyMuPDFParser, "_extract_images") as mock_images:
-                    mock_text.return_value = TextElement(text="Sample text")
-                    mock_tables.return_value = [TableElement(
-                        markdown="| Header |\n|--------|", 
-                        dataframe=pd.DataFrame(), 
-                        metadata=Metadata()
-                        )]
-                    
-                    mock_images.return_value = [ImageElement(
-                        image=Image.new("RGB", (60, 30)), 
-                        metadata=Metadata()
-                        )]
+        with (
+            patch.object(PyMuPDFParser, "_extract_text") as mock_text,
+            patch.object(PyMuPDFParser, "_extract_tables") as mock_tables,
+            patch.object(PyMuPDFParser, "_extract_images") as mock_images,
+        ):
+            mock_text.return_value = TextElement(text="Sample text")
+            mock_tables.return_value = [
+                TableElement(
+                    markdown="| Header |\n|--------|",
+                    dataframe=pd.DataFrame(),
+                    metadata=Metadata(),
+                )
+            ]
 
-                    result = parser._PyMuPDFParser__export_result(
-                        [mock_page], ["text", "tables", "images"]
-                        )
+            mock_images.return_value = [
+                ImageElement(image=Image.new("RGB", (60, 30)), metadata=Metadata())
+            ]
 
-                    assert isinstance(result, ParserOutput)
-                    assert result.text.text == "Sample text\n"
-                    assert len(result.tables) == 1
-                    assert len(result.images) == 1
+            result = parser._PyMuPDFParser__export_result(
+                [mock_page], ["text", "tables", "images"]
+            )
+
+            assert isinstance(result, ParserOutput)
+            assert result.text.text == "Sample text\n"
+            assert len(result.tables) == 1
+            assert len(result.images) == 1
 
     def test_extract_text(self, mock_page):
         """

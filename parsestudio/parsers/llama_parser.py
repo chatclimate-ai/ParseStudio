@@ -1,12 +1,15 @@
-from llama_parse import LlamaParse
-import os
-from typing import Generator, List, Union, Dict, Optional
-import pandas as pd
-from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
 import io
-from PIL import Image
+import os
+from collections.abc import Generator
+
+import pandas as pd
 from dotenv import load_dotenv
-from ..logging_config import get_logger
+from llama_parse import LlamaParse
+from PIL import Image
+
+from parsestudio.logging_config import get_logger
+
+from .schemas import ImageElement, Metadata, ParserOutput, TableElement, TextElement
 
 load_dotenv()
 logger = get_logger("parsers.llama")
@@ -18,43 +21,44 @@ class LlamaPDFParser:
 
     Args:
         llama_options (Optional[Dict], optional): A dictionary containing the options for the LlamaParse converter.
-    
+
     Raises:
         ValueError: An error occurred while initializing the LlamaParse converter.
     """
+
     def __init__(
-            self,
-            llama_options: Optional[Dict] = {
-                "show_progress": True,
-                "ignore_errors": False,
-                "split_by_page": False,
-                "invalidate_cache": False,
-                "do_not_cache": False,
-                "result_type": "markdown",
-                "continuous_mode": True,
-                "take_screenshot": True,
-                "disable_ocr": False,
-                "is_formatting_instruction": False,
-                "premium_mode": True,
-                "verbose": False
-            }
-            ):
-        
+        self,
+        llama_options: dict | None = None,
+    ):
         try:
             api_key = os.environ.get("LLAMA_PARSE_KEY")
             if not api_key:
                 raise ValueError("LLAMA_PARSE_KEY environment variable is required")
-            self.converter = LlamaParse(
-                api_key=api_key,
-                **llama_options
-            )
+            if llama_options is None:
+                llama_options = {
+                    "show_progress": True,
+                    "ignore_errors": False,
+                    "split_by_page": False,
+                    "invalidate_cache": False,
+                    "do_not_cache": False,
+                    "result_type": "markdown",
+                    "continuous_mode": True,
+                    "take_screenshot": True,
+                    "disable_ocr": False,
+                    "is_formatting_instruction": False,
+                    "premium_mode": True,
+                    "verbose": False,
+                }
+            self.converter = LlamaParse(api_key=api_key, **llama_options)
         except ValueError as e:
             # Re-raise ValueError for missing API key or invalid configuration
             raise e
         except Exception as e:
-            raise ConnectionError(f"Failed to initialize LlamaParse converter: {e}")
+            raise ConnectionError(
+                f"Failed to initialize LlamaParse converter: {e}"
+            ) from e
 
-    def load_documents(self, paths: List[str]) -> Generator[Dict, None, None]:
+    def load_documents(self, paths: list[str]) -> Generator[dict, None, None]:
         """
         Load the documents from the given paths and yield the JSON result.
 
@@ -64,11 +68,11 @@ class LlamaPDFParser:
         Yields:
             result (Generator[Dict, None, None]): A generator that yields the JSON result of the document.
         """
-        
-        document: List[Dict] = self.converter.get_json_result(paths)
+
+        document: list[dict] = self.converter.get_json_result(paths)
         yield from document
 
-    def _validate_modalities(self, modalities: List[str]) -> None:
+    def _validate_modalities(self, modalities: list[str]) -> None:
         """
         Validate the modalities provided by the user. The valid modalities are: ["text", "tables", "images"]
 
@@ -86,29 +90,29 @@ class LlamaPDFParser:
                 )
 
     def parse(
-            self,
-            paths: Union[str, List[str]],
-            modalities: List[str] = ["text", "tables", "images"],
-        ) -> List[ParserOutput]:
+        self,
+        paths: str | list[str],
+        modalities: list[str] | None = None,
+    ) -> list[ParserOutput]:
         """
         Parse the PDF file and return the extracted the specified modalities.
 
         Args:
             paths (Union[str, List[str]]): A path or a list of paths to the PDF files.
             modalities (List[str], optional): List of modalities to extract. Defaults to ["text", "tables", "images"].
-        
+
         Returns:
             data (List[ParserOutput]): A list of ParserOutput objects containing the extracted modalities.
-        
+
         Raises:
             ValueError: If the modality is not valid
-        
+
         Example:
         !!! example
             ```python
             parser = LlamaPDFParser()
             data = parser.parse("path/to/file.pdf", modalities=["text", "tables", "images"])
-            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "llama"}) 
+            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "llama"})
             # Output: 1
             text = data[0].text # TextElement
             tables = data[0].tables # List of TableElement
@@ -134,9 +138,11 @@ class LlamaPDFParser:
             image_obj = image.image # PIL Image object
             # Access the metadata of the image
             page_number = image.metadata.page_number
-            bbox = image.metadata.bbox 
+            bbox = image.metadata.bbox
             ```
         """
+        if modalities is None:
+            modalities = ["text", "tables", "images"]
         self._validate_modalities(modalities)
 
         if isinstance(paths, str):
@@ -149,27 +155,23 @@ class LlamaPDFParser:
 
         return data
 
-    def __export_result(
-            self, 
-            json_result: dict, 
-            modalities: List[str]
-        ) -> ParserOutput:
+    def __export_result(self, json_result: dict, modalities: list[str]) -> ParserOutput:
         """
         Export the result to the ParserOutput object.
 
         Args:
             json_result (dict): The JSON result of the document.
             modalities (List[str]): List of modalities to extract.
-        
+
         Returns:
             output (ParserOutput): The ParserOutput object containing the extracted modalities.
         """
         text = TextElement(text="")
-        tables: List[TableElement] = []
-        images: List[ImageElement] = []
+        tables: list[TableElement] = []
+        images: list[ImageElement] = []
 
         job_id: str = json_result["job_id"]
-        pages: List[Dict] = json_result["pages"]
+        pages: list[dict] = json_result["pages"]
 
         for page in pages:
             if "text" in modalities:
@@ -184,7 +186,7 @@ class LlamaPDFParser:
         return ParserOutput(text=text, tables=tables, images=images)
 
     @staticmethod
-    def _extract_text(page: Dict) -> TextElement:
+    def _extract_text(page: dict) -> TextElement:
         """
         Extract the text from the page dict.
 
@@ -193,7 +195,7 @@ class LlamaPDFParser:
 
         Returns:
             text (TextElement): TextElement object
-        
+
         Examples:
         !!! example
             ```python
@@ -205,16 +207,16 @@ class LlamaPDFParser:
         return TextElement(text=page["text"])
 
     @staticmethod
-    def _extract_tables(page: Dict) -> List[TableElement]:
+    def _extract_tables(page: dict) -> list[TableElement]:
         """
         Extract the tables from the page dict.
 
         Args:
             page (Dict): A dictionary containing the page information.
-        
+
         Returns:
             tables (List[TableElement]): List of TableElement objects
-        
+
         Examples:
         !!! example
             ```python
@@ -226,28 +228,38 @@ class LlamaPDFParser:
             bbox = table.metadata.bbox
             ```
         """
-        tables: List[TableElement] = []
+        tables: list[TableElement] = []
         for item in page["items"]:
             if item["type"] == "table":
                 table_md = item["md"]
                 try:
                     table_df = pd.read_csv(io.StringIO(item["csv"]), sep=",")
-                except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError) as e:
-                    logger.warning("Table parsing failed - malformed data", extra={"error": str(e), "parser": "llama"})
+                except (
+                    pd.errors.EmptyDataError,
+                    pd.errors.ParserError,
+                    ValueError,
+                ) as e:
+                    logger.warning(
+                        "Table parsing failed - malformed data",
+                        extra={"error": str(e), "parser": "llama"},
+                    )
                 except Exception as e:
-                    logger.error("Unexpected error converting table to dataframe", extra={"error": str(e), "parser": "llama"})
+                    logger.error(
+                        "Unexpected error converting table to dataframe",
+                        extra={"error": str(e), "parser": "llama"},
+                    )
                     table_df = None
-                
+
                 tables.append(
                     TableElement(
-                        markdown=table_md, 
-                        dataframe=table_df, 
-                        metadata=Metadata(page_number=page["page"])
+                        markdown=table_md,
+                        dataframe=table_df,
+                        metadata=Metadata(page_number=page["page"]),
                     )
                 )
         return tables
 
-    def _extract_images(self, page: Dict, job_id: str) -> List[ImageElement]:
+    def _extract_images(self, page: dict, job_id: str) -> list[ImageElement]:
         """
         Extract the images from the page dict.
 
@@ -268,22 +280,15 @@ class LlamaPDFParser:
             bbox = image.metadata.bbox
             ```
         """
-        images: List[ImageElement] = []
-        image_dicts = self.converter.get_images([{
-            "job_id": job_id,
-            "pages": [page]
-            }], download_path="llama_images")
+        images: list[ImageElement] = []
+        image_dicts = self.converter.get_images(
+            [{"job_id": job_id, "pages": [page]}], download_path="llama_images"
+        )
         for img in image_dicts:
             image_path = img["path"]
             image = Image.open(image_path).convert("RGB")
             images.append(
-                ImageElement(
-                    image=image, 
-                    metadata=Metadata(page_number=page["page"])
-                    )
-                )
+                ImageElement(image=image, metadata=Metadata(page_number=page["page"]))
+            )
             os.remove(image_path)
         return images
-    
-
-

@@ -162,3 +162,20 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 parstudio/
+
+# Development tools
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+llama_images/
+
+# VS Code
+.vscode/
+
+# Development artifacts
+*.log
+.env.local
+.env.development
