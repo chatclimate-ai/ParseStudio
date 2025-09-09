@@ -6,10 +6,12 @@ import json
 import os
 import time
 from dotenv import load_dotenv
+from ..logging_config import get_logger
 
 from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
 
 load_dotenv()
+logger = get_logger("parsers.openai")
 
 JSON_SCHEMA = {
     "name": "pdf_content_extract",
@@ -157,7 +159,7 @@ class OpenAIFileSearchPDFParser:
                 time.sleep((attempt + 1) * 1.5)
 
         # Fallback minimal structure if all retries fail
-        print(f"[WARN] File search analysis failed: {last_err}")
+        logger.warning("File search analysis failed after retries", extra={"error": str(last_err), "retries": retries})
         return {"text_content": "", "tables": []}
 
     def _cleanup_resources(self, file_ids: List[str], vector_store_id: str):
@@ -172,9 +174,9 @@ class OpenAIFileSearchPDFParser:
                 try:
                     self.client.files.delete(file_id)
                 except Exception as e:
-                    print(f"[WARN] Failed to delete file {file_id}: {e}")
+                    logger.warning("Failed to delete file", extra={"file_id": file_id, "error": str(e)})
         except Exception as e:
-            print(f"[WARN] Cleanup failed: {e}")
+            logger.warning("Resource cleanup failed", extra={"error": str(e)})
 
     def load_documents(self, paths: List[str]) -> Generator[Dict, None, None]:
         """Load and analyze PDF documents using OpenAI file search."""
@@ -196,7 +198,7 @@ class OpenAIFileSearchPDFParser:
                 yield result
 
             except Exception as e:
-                print(f"[ERROR] Processing {path}: {e}")
+                logger.error("Failed to process PDF file", extra={"file_path": path, "error": str(e), "parser": "openai"})
                 yield {"text_content": "", "tables": []}
                 
             finally:
@@ -260,7 +262,7 @@ class OpenAIFileSearchPDFParser:
                     )
                 )
             except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError) as e:
-                print(f"[WARN] Table parsing failed - malformed data: {e}")
+                logger.warning("Table parsing failed - malformed data", extra={"error": str(e), "parser": "openai"})
             except Exception as e:
-                print(f"[ERROR] Unexpected table parsing error: {e}")
+                logger.error("Unexpected table parsing error", extra={"error": str(e), "parser": "openai"})
         return out

@@ -4,6 +4,9 @@ from typing import Union, List, Generator, Dict
 from io import BytesIO
 from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
 from fitz import Page
+from ..logging_config import get_logger
+
+logger = get_logger("parsers.pymupdf")
 
 
 class PyMuPDFParser:
@@ -70,7 +73,7 @@ class PyMuPDFParser:
             ```python
             parser = PyMuPDFParser()
             data = parser.parse("path/to/file.pdf", modalities=["text", "tables", "images"])
-            print(len(data)) 
+            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "pymupdf"}) 
             # Output: 1
             text = data[0].text # TextElement
             tables = data[0].tables # List of TableElement
@@ -157,7 +160,7 @@ class PyMuPDFParser:
             with fitz.open("path/to/file.pdf") as doc:
                 page = doc.load_page(0)
                 text = parser._extract_text(page)
-                print(text.text)
+                logger.debug(f"Extracted text: {text.text[:100]}...", extra={"parser": "pymupdf"})
             
             # Output: 'Hello, World!'
             ```

@@ -10,6 +10,9 @@ from PIL import Image
 from typing import Union, List, Generator, Optional
 from .schemas import ParserOutput, TableElement, ImageElement, TextElement, Metadata
 import sys
+from ..logging_config import get_logger
+
+logger = get_logger("parsers.docling")
 
 
 
@@ -121,7 +124,7 @@ class DoclingPDFParser:
             ```python
             parser = DoclingPDFParser()
             data = parser.parse("path/to/document.pdf", modalities=["text", "tables", "images"])
-            print(len(data)) 
+            logger.debug(f"Parsed {len(data)} documents", extra={"parser": "docling"}) 
             # Output: 1
             text = data[0].text # TextElement
             tables = data[0].tables # List of TableElement

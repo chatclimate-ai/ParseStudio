@@ -73,11 +73,11 @@ class PDFParser:
            # Output: 1
 
            # Access text content
-           print(outputs[0].text)
+           text_content = outputs[0].text
            # Output: text='Hello, World!'
 
            # Access tables
-           print(outputs[0].tables)
+           tables = outputs[0].tables
            # Output:
            # [
            #     TableElement(
@@ -96,8 +96,7 @@ class PDFParser:
                metadata = table.metadata
                markdown_table = table.markdown
                pandas_dataframe = table.dataframe
-               print(metadata)
-               print(markdown_table)
+               # Access metadata and markdown representation
            # Output:
            # Metadata(page_number=1, bbox=[0, 0, 100, 100])
            # | Column 1 | Column 2 |
@@ -106,7 +105,7 @@ class PDFParser:
            # | Value 3  | Value 4  |
 
            # Access images
-           print(outputs[0].images)
+           images = outputs[0].images
            # Output:
            # [
            #     ImageElement(
@@ -117,9 +116,9 @@ class PDFParser:
 
            for image in outputs[0].images:
                metadata = image.metadata
-               image = image.image
-               print(metadata)
-               image.show()
+               pil_image = image.image
+               # Access metadata and display image
+               # pil_image.show()  # Uncomment to display
            # Output:
            # Metadata(page_number=1, bbox=[0, 0, 100, 100])
            # [Image shown]

@@ -8,8 +8,10 @@ import json
 import os
 import base64
 from dotenv import load_dotenv
+from ..logging_config import get_logger
 
 load_dotenv()
+logger = get_logger("parsers.anthropic")
 
 class AnthropicPDFParser:
     """
@@ -90,7 +92,7 @@ class AnthropicPDFParser:
                 
                 yield result
             except Exception as e:
-                print(f"Error processing file {path}: {str(e)}")
+                logger.error(f"Error processing file {path}", extra={"file_path": path, "error": str(e)})
                 yield {"text_content": "", "tables": []}
 
     def _validate_modalities(self, modalities: List[str]) -> None:
@@ -132,8 +134,8 @@ class AnthropicPDFParser:
             data = parser.parse("file.pdf", modalities=["text", "tables"])
             text = data[0].text.text
             for table in data[0].tables:
-                print(table.markdown)
-                print(table.metadata.page_number)
+                logger.debug(f"Table markdown: {table.markdown}")
+                logger.debug(f"Table page: {table.metadata.page_number}")
             ```
         """
         self._validate_modalities(modalities)
@@ -195,9 +197,9 @@ class AnthropicPDFParser:
                     )
                 )
             except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError, KeyError) as e:
-                print(f"Table parsing failed - malformed data: {e}")
+                logger.warning(f"Table parsing failed - malformed data", extra={"error": str(e), "parser": "anthropic"})
                 continue
             except Exception as e:
-                print(f"Unexpected error processing table: {e}")
+                logger.error(f"Unexpected error processing table", extra={"error": str(e), "parser": "anthropic"})
                 continue
         return tables
