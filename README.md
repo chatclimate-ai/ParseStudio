@@ -1,6 +1,24 @@
-# ParserStudio
+![ParseStudio Logo](./images/logo.webp)
 
-Parsestudio is a powerful Python library for extracting and parsing content from PDF documents. It provides an intuitive interface for handling diverse tasks such as extracting text, tables, and images using different parsing backends.
+# 📄 ParseStudio ✨
+
+[![PyPI version](https://img.shields.io/pypi/v/parsestudio.svg)](https://pypi.org/project/parsestudio/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/chatclimate-ai/ParseStudio/blob/main/LICENSE)
+[![Python versions](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![GitHub stars](https://img.shields.io/github/stars/chatclimate-ai/ParseStudio.svg)](https://github.com/chatclimate-ai/ParseStudio/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/chatclimate-ai/ParseStudio.svg)](https://github.com/chatclimate-ai/ParseStudio/issues)
+[![GitHub forks](https://img.shields.io/github/forks/chatclimate-ai/ParseStudio.svg)](https://github.com/chatclimate-ai/ParseStudio/network)
+[![Downloads](https://static.pepy.tech/badge/parsestudio)](https://pepy.tech/project/parsestudio)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+
+**ParseStudio** is a powerful and flexible Python library for extracting and parsing content from PDF documents. It provides an intuitive interface for handling diverse tasks such as extracting text, tables, and images using different parsing backends.
+
+## Requirements
+
+- Python 3.11 or higher
+- Compatible with Python 3.11, 3.12
 
 ---
 
@@ -12,15 +30,15 @@ Parsestudio is a powerful Python library for extracting and parsing content from
 
 ---
 
-## Installation
+## 🚀 Installation
 
-Get started with Parsestudio by installing it via pip:
+### Via pip (recommended)
 
 ```bash
 pip install parsestudio
 ```
 
-Install the library from source by cloning the repository and running:
+### From source
 
 ```bash
 git clone https://github.com/chatclimate-ai/ParseStudio.git
@@ -28,8 +46,15 @@ cd ParseStudio
 pip install .
 ```
 
-## Quick Start
+### Development installation
 
+```bash
+git clone https://github.com/chatclimate-ai/ParseStudio.git
+cd ParseStudio
+pip install -e ".[dev]"
+```
+
+## ⚡ Quick Start
 
 ### 1. Import and Initialize the Parser
 
@@ -137,8 +162,23 @@ make all-checks # Run all quality checks
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
 
-### Code Quality
+---
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/chatclimate-ai/ParseStudio/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/chatclimate-ai/ParseStudio/discussions)
+- 📧 **Contact**: For questions about usage or contributions, please open an issue
+
+## Acknowledgments
+
+ParseStudio integrates with several excellent open-source and commercial parsing solutions:
+- [Docling](https://github.com/DS4SD/docling) - Advanced document parsing
+- [PyMuPDF](https://github.com/pymupdf/PyMuPDF) - Fast PDF processing
+- [LlamaParse](https://github.com/run-llama/llama_parse) - AI-powered document parsing
+- [Anthropic Claude](https://www.anthropic.com/claude) - Advanced AI capabilities
+- [OpenAI GPT-4](https://openai.com/gpt-4) - State-of-the-art document analysis
