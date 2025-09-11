@@ -28,7 +28,7 @@
 
 ## Key Features
 
-- **Modular Design**: Choose between multiple parser backends (Docling, PymuPDF, Llama Parse, Anthropic Claude, OpenAI GPT-4 Vision) to suit your needs.
+- **Modular Design**: Choose between multiple parser backends (Docling, PymuPDF, Llama Parse, Anthropic Claude, OpenAI File Search) to suit your needs.
 - **Multimodal Parsing**: Extract text, tables, and images seamlessly.
 - **Extensible**: Easily adjust parsing behavior with additional parameters.
 
@@ -102,7 +102,7 @@ Choose from the following parsers based on your requirements:
 - **[PyMuPDF](https://github.com/pymupdf/PyMuPDF)**: Lightweight and efficient.
 - **[LlamaParse](https://github.com/run-llama/llama_parse)**: AI-enhanced parser with advanced capabilities.
 - **[Anthropic Claude](https://www.anthropic.com/claude)**: Advanced AI model using Claude 3.5 Sonnet with native PDF processing capabilities.
-- **[OpenAI GPT-4 Vision](https://openai.com/gpt-4)**: State-of-the-art vision model for document analysis.
+- **[OpenAI File Search](https://platform.openai.com/docs/assistants/tools/file-search)**: Efficient document processing using vector embeddings and file search capabilities.
 
 Each parser has its own strengths. Choose the one that best fits your use case.
 
@@ -185,4 +185,4 @@ ParseStudio integrates with several excellent open-source and commercial parsing
 - [PyMuPDF](https://github.com/pymupdf/PyMuPDF) - Fast PDF processing
 - [LlamaParse](https://github.com/run-llama/llama_parse) - AI-powered document parsing
 - [Anthropic Claude](https://www.anthropic.com/claude) - Advanced AI capabilities
-- [OpenAI GPT-4](https://openai.com/gpt-4) - State-of-the-art document analysis
+- [OpenAI File Search](https://platform.openai.com/docs/assistants/tools/file-search) - Efficient document processing with vector embeddings
