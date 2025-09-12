@@ -36,7 +36,7 @@ def _load_extraction_function_tool() -> dict[str, Any]:
     schema_path = Path(__file__).parent / "tools" / "openai_extraction.json"
     try:
         schema = srsly.read_json(schema_path)
-        # Convert JSON schema to function tool definition
+        # Convert JSON schema to function tool definition, necessary for older OpenAI versions
         return {
             "type": "function",
             "function": {
