@@ -1,20 +1,20 @@
 from typing import Any
 
-from .openai_file_search_parser import OpenAIFileSearchPDFParser
+from .openai_file_search_parser import OpenAIAssistantPDFParser
 from .schemas import ParserOutput
 
 
 class OpenAIPDFParser:
     """
-    OpenAI PDF Parser using file search approach.
-    Uses OpenAI's file search with vector embeddings for efficient PDF processing.
+    OpenAI PDF Parser using assistant approach.
+    Uses OpenAI's Assistant API with file search capabilities for comprehensive PDF processing.
 
     Args:
         openai_options: Options to pass to the underlying parser
     """
 
     def __init__(self, openai_options: dict[str, Any] | None = None):
-        self.parser = OpenAIFileSearchPDFParser(openai_options)
+        self.parser = OpenAIAssistantPDFParser(openai_options)
 
     def parse(
         self,

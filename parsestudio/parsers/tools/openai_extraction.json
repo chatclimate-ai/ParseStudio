@@ -1,0 +1,44 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "tables": {
+      "description": "An array containing all tables detected and extracted from the PDF document. Each table is represented as a separate object with its content converted to markdown format along with positional metadata.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bbox": {
+            "description": "The bounding box coordinates of the table on the page, represented as [x0, y0, x1, y1] where (x0, y0) is the top-left corner and (x1, y1) is the bottom-right corner. Coordinates are typically in points (1/72 inch) relative to the page origin (usually bottom-left).",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array"
+          },
+          "markdown": {
+            "description": "The table content represented in markdown table format. This includes properly formatted headers, rows, and columns with appropriate markdown table syntax (pipes and dashes). The content preserves the original table structure and data as accurately as possible.",
+            "type": "string"
+          },
+          "page_number": {
+            "description": "The page number (1-indexed) where this table appears in the PDF document. This helps locate the table within the original document context.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "markdown"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "text_content": {
+      "description": "The complete textual content extracted from the PDF document. This includes all readable text from paragraphs, headings, captions, footnotes, and other text elements, but excludes tabular data which is handled separately. The text is presented in a clean, readable format with appropriate spacing and line breaks preserved where meaningful.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text_content",
+    "tables"
+  ],
+  "type": "object"
+}
