@@ -30,6 +30,7 @@ dependencies = [
     "python-dotenv>=1.0.1,<2.0.0",
     "anthropic",
     "openai",
+    "srsly>=2.5.1",
 ]
 
 [project.optional-dependencies]
